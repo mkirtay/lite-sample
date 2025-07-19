@@ -1,0 +1,24 @@
+{
+  "name": "employee-list-app",
+  "version": "1.0.0",
+  "description": "Employee Management Application with LitElement",
+  "main": "index.js",
+  "scripts": {
+    "start": "web-dev-server --node-resolve --open --watch",
+    "test": "web-test-runner --coverage",
+    "test:watch": "web-test-runner --watch"
+  },
+  "keywords": ["lit-element", "employee-management", "redux-toolkit"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lit": "^3.3.1",
+    "@vaadin/router": "^1.7.5",
+    "@reduxjs/toolkit": "^2.0.1"
+  },
+  "devDependencies": {
+    "@web/dev-server": "^0.4.6",
+    "@web/test-runner": "^0.18.0",
+    "@open-wc/testing": "^4.0.0"
+  }
+}
