@@ -1,92 +1,77 @@
 export const tr = {
-  // Navigation
-  nav: {
-    employees: 'Çalışanlar',
-    addNew: 'Yeni Ekle',
-    logout: 'Çıkış'
-  },
-  
-  // Employee List
-  employeeList: {
-    title: 'Çalışan Listesi',
-    search: 'Çalışan ara...',
-    allDepartments: 'Tüm Departmanlar',
-    viewTable: 'Tablo Görünümü',
-    viewCards: 'Kart Görünümü',
-    noResults: 'Çalışan bulunamadı',
-    totalEmployees: 'çalışan'
-  },
-  
-  // Employee Form
-  employeeForm: {
-    addTitle: 'Çalışan Ekle',
-    editTitle: 'Çalışan Düzenle',
-    editingEmployee: '{name} adlı çalışanı düzenliyorsunuz',
-    firstName: 'Ad',
-    lastName: 'Soyad',
-    dateOfEmployment: 'İşe Başlama Tarihi',
-    dateOfBirth: 'Doğum Tarihi',
-    phone: 'Telefon',
-    email: 'E-posta',
-    department: 'Departman',
-    position: 'Pozisyon',
-    pleaseSelect: 'Lütfen Seçiniz',
-    save: 'Kaydet',
-    cancel: 'İptal'
-  },
-  
-  // Table Headers
-  table: {
-    firstName: 'Ad',
-    lastName: 'Soyad',
-    dateOfEmployment: 'İşe Başlama Tarihi',
-    dateOfBirth: 'Doğum Tarihi',
-    phone: 'Telefon',
-    email: 'E-posta',
-    department: 'Departman',
-    position: 'Pozisyon',
-    actions: 'İşlemler'
-  },
-  
-  // Actions
-  actions: {
-    edit: 'Düzenle',
-    delete: 'Sil',
-    view: 'Görüntüle'
-  },
-  
-  // Confirmations
-  confirmations: {
-    deleteTitle: 'Emin misiniz?',
-    deleteMessage: '{name} adlı çalışanın kaydı silinecek',
-    proceed: 'Devam Et',
-    cancel: 'İptal'
-  },
-  
-  // Validation Messages
-  validation: {
-    required: 'Bu alan zorunludur',
-    invalidEmail: 'Lütfen geçerli bir e-posta adresi giriniz',
-    invalidPhone: 'Lütfen geçerli bir telefon numarası giriniz',
-    invalidName: 'Lütfen geçerli bir isim giriniz',
-    emailExists: 'Bu e-posta adresi zaten kayıtlı',
-    phoneExists: 'Bu telefon numarası zaten kayıtlı'
-  },
-  
-  // Notifications
-  notifications: {
-    employeeAdded: 'Çalışan başarıyla eklendi',
-    employeeUpdated: 'Çalışan başarıyla güncellendi',
-    employeeDeleted: 'Çalışan başarıyla silindi',
-    error: 'Bir hata oluştu. Lütfen tekrar deneyiniz.'
-  },
-  
   // Common
   common: {
+    search: 'Çalışan ara...',
+    filter: 'Departmana göre filtrele',
+    allDepartments: 'Tüm Departmanlar',
+    table: 'Tablo',
+    cards: 'Kartlar',
+    language: 'Dil',
     loading: 'Yükleniyor...',
-    error: 'Hata',
-    success: 'Başarılı',
-    warning: 'Uyarı',
-    info: 'Bilgi'
+    noResults: 'Çalışan bulunamadı',
+    cancel: 'İptal',
+    save: 'Kaydet',
+    update: 'Güncelle',
+    delete: 'Sil',
+    edit: 'Düzenle',
+    add: 'Ekle',
+    confirm: 'Onayla'
+  },
+
+  // Employee
+  employee: {
+    title: 'Çalışan Yönetimi',
+    subtitle: 'Ekibinizi verimli bir şekilde yönetin',
+    firstName: 'Ad',
+    lastName: 'Soyad',
+    email: 'E-posta',
+    phone: 'Telefon',
+    department: 'Departman',
+    position: 'Pozisyon',
+    hireDate: 'İşe Başlama Tarihi',
+    salary: 'Maaş',
+    actions: 'İşlemler',
+    addEmployee: 'Çalışan Ekle',
+    editEmployee: 'Çalışan Düzenle',
+    addDescription: 'Ekibinize yeni bir çalışan eklemek için aşağıdaki formu doldurun.',
+    editDescription: 'Çalışan bilgilerini güncellemek için aşağıdaki bilgileri düzenleyin.',
+    selectDepartment: 'Departman Seçin'
+  },
+
+  // Departments
+  departments: {
+    engineering: 'Mühendislik',
+    marketing: 'Pazarlama',
+    sales: 'Satış',
+    hr: 'İnsan Kaynakları',
+    finance: 'Finans'
+  },
+
+  // Validation
+  validation: {
+    required: 'Bu alan zorunludur',
+    invalidEmail: 'Lütfen geçerli bir e-posta adresi girin',
+    emailExists: 'Bu e-posta adresi zaten kullanımda',
+    invalidPhone: 'Lütfen geçerli bir telefon numarası girin',
+    minLength: 'En az {min} karakter olmalı',
+    futureDate: 'Tarih gelecekte olamaz',
+    invalidSalary: 'Lütfen geçerli bir maaş tutarı girin'
+  },
+
+  // Pagination
+  pagination: {
+    previous: 'Önceki',
+    next: 'Sonraki',
+    showing: '{total} çalışanın {start}-{end} arası gösteriliyor',
+    page: 'Sayfa'
+  },
+
+  // Positions
+  positions: {
+    junior: 'Junior',
+    senior: 'Senior',
+    lead: 'Uzman',
+    manager: 'Müdür',
+    director: 'Direktör'
   }
 }; 

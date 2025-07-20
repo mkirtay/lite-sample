@@ -1,57 +1,47 @@
 import { Router } from '@vaadin/router';
-import { ROUTES } from '../utils/constants.js';
 
-export class AppRouter {
-  constructor(outlet) {
-    this.router = new Router(outlet);
-    this.setupRoutes();
+export const router = new Router();
+
+export function initializeRouter(outlet) {
+  console.log('🚀 Router initializing with outlet:', outlet);
+  
+  if (!outlet) {
+    console.error('❌ Router outlet not found!');
+    return;
   }
 
-  setupRoutes() {
-    this.router.setRoutes([
-      {
-        path: '/',
-        redirect: ROUTES.EMPLOYEE_LIST
-      },
-      {
-        path: ROUTES.EMPLOYEE_LIST,
-        component: 'employee-list-page',
-        action: async () => {
-          await import('../components/employee-list/employee-list-page.js');
-        }
-      },
-      {
-        path: ROUTES.EMPLOYEE_ADD,
-        component: 'employee-form-page',
-        action: async () => {
-          await import('../components/employee-form/employee-form-page.js');
-        }
-      },
-      {
-        path: `${ROUTES.EMPLOYEE_EDIT}/:id`,
-        component: 'employee-form-page',
-        action: async () => {
-          await import('../components/employee-form/employee-form-page.js');
-        }
-      },
-      {
-        path: '(.*)',
-        redirect: ROUTES.EMPLOYEE_LIST
+  router.setOutlet(outlet);
+  
+  router.setRoutes([
+    {
+      path: '/',
+      redirect: '/employees'
+    },
+    {
+      path: '/employees',
+      component: 'employee-list-page',
+      action: async () => {
+        console.log('📄 Loading employee list page...');
+        await import('../components/employee-list/employee-list-page.js');
       }
-    ]);
-  }
+    },
+    {
+      path: '/employees/add',
+      component: 'employee-form-page', 
+      action: async () => {
+        console.log('📝 Loading add employee form...');
+        await import('../components/employee-form/employee-form-page.js');
+      }
+    },
+    {
+      path: '/employees/edit/:id',
+      component: 'employee-form-page',
+      action: async () => {
+        console.log('✏️ Loading edit employee form...');
+        await import('../components/employee-form/employee-form-page.js');
+      }
+    }
+  ]);
 
-  /**
-   * Navigate to a specific route
-   */
-  navigate(path) {
-    Router.go(path);
-  }
-
-  /**
-   * Get current route
-   */
-  getCurrentRoute() {
-    return window.location.pathname;
-  }
+  console.log('✅ Router initialized successfully');
 } 

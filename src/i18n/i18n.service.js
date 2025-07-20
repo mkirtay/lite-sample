@@ -1,77 +1,97 @@
 import { en } from './en.js';
 import { tr } from './tr.js';
 
-const translations = {
-  en,
-  tr
-};
+class I18nService {
+  constructor() {
+    this.currentLanguage = document.documentElement.lang || 'tr';
+    this.translations = {
+      en,
+      tr
+    };
 
-/**
- * Get translation by key and language
- * @param {string} key - Translation key (e.g., 'nav.employees')
- * @param {string} language - Language code ('en' or 'tr')
- * @param {Object} params - Parameters for string interpolation
- * @returns {string} Translated text
- */
-export const t = (key, language = 'en', params = {}) => {
-  const keys = key.split('.');
-  let translation = translations[language];
-  
-  // Navigate through nested keys
-  for (const k of keys) {
-    if (translation && typeof translation === 'object' && k in translation) {
-      translation = translation[k];
-    } else {
-      // Fallback to English if key not found
-      translation = translations.en;
-      for (const fallbackKey of keys) {
-        if (translation && typeof translation === 'object' && fallbackKey in translation) {
-          translation = translation[fallbackKey];
-        } else {
-          return key; // Return key if not found in any language
-        }
-      }
-      break;
-    }
+    // Listen for language changes
+    window.addEventListener('language-changed', (e) => {
+      this.currentLanguage = e.detail.language;
+    });
   }
-  
-  // If final result is not a string, return the key
-  if (typeof translation !== 'string') {
+
+  /**
+   * Get translation for a key with optional parameters
+   * @param {string} key - Translation key (e.g., 'employee.firstName')
+   * @param {Object} params - Parameters to interpolate (e.g., {min: 2})
+   * @returns {string} Translated text
+   */
+  t(key, params = {}) {
+    const keys = key.split('.');
+    let translation = this.translations[this.currentLanguage];
+
+    // Navigate through nested keys
+    for (const k of keys) {
+      if (translation && typeof translation === 'object' && k in translation) {
+        translation = translation[k];
+      } else {
+        // Fallback to English if key not found
+        translation = this.translations.en;
+        for (const fallbackKey of keys) {
+          if (translation && typeof translation === 'object' && fallbackKey in translation) {
+            translation = translation[fallbackKey];
+          } else {
+            console.warn(`Translation key "${key}" not found in ${this.currentLanguage} or English`);
+            return key; // Return key as fallback
+          }
+        }
+        break;
+      }
+    }
+
+    // If we got a string, interpolate parameters
+    if (typeof translation === 'string') {
+      return this.interpolate(translation, params);
+    }
+
+    console.warn(`Translation key "${key}" not found or is not a string`);
     return key;
   }
-  
-  // Replace parameters in the string
-  let result = translation;
-  Object.keys(params).forEach(param => {
-    result = result.replace(new RegExp(`{${param}}`, 'g'), params[param]);
-  });
-  
-  return result;
-};
 
-/**
- * Get available languages
- */
-export const getAvailableLanguages = () => {
-  return Object.keys(translations);
-};
-
-/**
- * Check if language is supported
- */
-export const isLanguageSupported = (language) => {
-  return language in translations;
-};
-
-/**
- * Get current language from HTML lang attribute or browser
- */
-export const getCurrentLanguage = () => {
-  const htmlLang = document.documentElement.lang;
-  if (htmlLang && isLanguageSupported(htmlLang)) {
-    return htmlLang;
+  /**
+   * Interpolate parameters in translation string
+   * @param {string} text - Text with placeholders like {key}
+   * @param {Object} params - Parameters to replace
+   * @returns {string} Interpolated text
+   */
+  interpolate(text, params) {
+    return text.replace(/\{([^}]+)\}/g, (match, key) => {
+      return params.hasOwnProperty(key) ? params[key] : match;
+    });
   }
-  
-  const browserLang = navigator.language.slice(0, 2);
-  return isLanguageSupported(browserLang) ? browserLang : 'en';
-}; 
+
+  /**
+   * Set current language
+   * @param {string} language - Language code ('en' or 'tr')
+   */
+  setLanguage(language) {
+    if (this.translations[language]) {
+      this.currentLanguage = language;
+      document.documentElement.lang = language;
+    }
+  }
+
+  /**
+   * Get current language
+   * @returns {string} Current language code
+   */
+  getCurrentLanguage() {
+    return this.currentLanguage;
+  }
+
+  /**
+   * Get all available languages
+   * @returns {Array} Array of language codes
+   */
+  getAvailableLanguages() {
+    return Object.keys(this.translations);
+  }
+}
+
+// Export singleton instance
+export const i18nService = new I18nService(); 

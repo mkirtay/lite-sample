@@ -1,388 +1,526 @@
 import { LitElement, html, css } from 'lit';
-import { t } from '../../i18n/i18n.service.js';
-import { DEPARTMENTS, VIEW_MODES, APP_CONSTANTS } from '../../utils/constants.js';
-import { debounce } from '../../utils/helpers.js';
+import { i18nService } from '../../i18n/i18n.service.js';
 
 // Import child components
 import '../employee-table/employee-table.js';
 import '../employee-cards/employee-cards.js';
 import '../search-filter/search-filter.js';
 import '../pagination/pagination.js';
+import '../modal/modal.js';
 
-// Sample data
-const SAMPLE_EMPLOYEES = [
-  {
-    id: '1',
-    firstName: 'Ahmet',
-    lastName: 'Yılmaz',
-    dateOfEmployment: '2022-01-15',
-    dateOfBirth: '1990-05-10',
-    phone: '+90 532 123 4567',
-    email: 'ahmet.yilmaz@company.com',
-    department: 'Tech',
-    position: 'Senior'
-  },
-  {
-    id: '2',
-    firstName: 'Ayşe',
-    lastName: 'Kaya',
-    dateOfEmployment: '2021-06-10',
-    dateOfBirth: '1988-12-03',
-    phone: '+90 533 234 5678',
-    email: 'ayse.kaya@company.com',
-    department: 'Analytics',
-    position: 'Medior'
-  },
-  {
-    id: '3',
-    firstName: 'Mehmet',
-    lastName: 'Demir',
-    dateOfEmployment: '2020-03-20',
-    dateOfBirth: '1985-08-15',
-    phone: '+90 534 345 6789',
-    email: 'mehmet.demir@company.com',
-    department: 'Tech',
-    position: 'Senior'
-  },
-  {
-    id: '4',
-    firstName: 'Fatma',
-    lastName: 'Öztürk',
-    dateOfEmployment: '2021-09-05',
-    dateOfBirth: '1992-02-28',
-    phone: '+90 535 456 7890',
-    email: 'fatma.ozturk@company.com',
-    department: 'Analytics',
-    position: 'Junior'
-  }
-];
-
-class EmployeeListPage extends LitElement {
+export class EmployeeListPage extends LitElement {
   static properties = {
-    employees: { type: Array },
-    searchTerm: { type: String },
-    selectedDepartment: { type: String },
-    currentPage: { type: Number },
-    viewMode: { type: String },
-    language: { type: String }
+    employees: { type: Array, state: true },
+    filteredEmployees: { type: Array, state: true },
+    paginatedEmployees: { type: Array, state: true },
+    searchTerm: { type: String, state: true },
+    selectedDepartment: { type: String, state: true },
+    currentPage: { type: Number, state: true },
+    itemsPerPage: { type: Number },
+    viewMode: { type: String, state: true },
+    isLoading: { type: Boolean, state: true },
+    showDeleteModal: { type: Boolean, state: true },
+    employeeToDelete: { type: Object, state: true }
   };
 
   static styles = css`
     :host {
       display: block;
+      min-height: calc(100vh - 120px);
+      background: #f8f9fa;
+      padding: 2rem;
+    }
+
+    .page-container {
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
     .page-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .header-content {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: var(--spacing-xl);
-      padding-bottom: var(--spacing-lg);
-      border-bottom: 1px solid var(--color-gray-200);
+      gap: 2rem;
     }
 
-    .page-title {
+    .header-text h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #ff6200;
       margin: 0;
-      color: var(--color-gray-800);
     }
 
     .header-actions {
       display: flex;
-      gap: var(--spacing-md);
+      gap: 1rem;
       align-items: center;
-    }
-
-    .employee-count {
-      font-size: var(--font-size-sm);
-      color: var(--color-gray-600);
-      background: var(--color-gray-100);
-      padding: var(--spacing-xs) var(--spacing-md);
-      border-radius: var(--border-radius-md);
     }
 
     .add-employee-btn {
-      background: var(--color-primary);
-      color: var(--color-white);
+      background: #ff6200;
+      color: white;
       border: none;
-      padding: var(--spacing-sm) var(--spacing-lg);
-      border-radius: var(--border-radius-md);
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-medium);
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: background-color var(--transition-fast);
-      text-decoration: none;
-      display: inline-flex;
+      transition: all 0.2s ease;
+      display: flex;
       align-items: center;
-      gap: var(--spacing-xs);
+      gap: 0.5rem;
     }
 
     .add-employee-btn:hover {
-      background: var(--color-primary-dark);
+      background: #e55a2b;
+    }
+
+    .employees-icon {
+      background: #ff6200;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+
+    .language-switch {
+      background: white;
+      border: 1px solid #e1e5e9;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      min-width: 40px;
+      text-align: center;
+    }
+
+    .content-container {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e1e5e9;
+      overflow: hidden;
+    }
+
+    .controls-section {
+      padding: 1rem 2rem;
+      border-bottom: 1px solid #e1e5e9;
+      background: #f8f9fa;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .search-filter-container {
+      flex: 1;
+      margin-right: 2rem;
     }
 
     .view-toggle {
       display: flex;
-      background: var(--color-gray-100);
-      border-radius: var(--border-radius-md);
-      padding: var(--spacing-xs);
-      gap: var(--spacing-xs);
+      gap: 0.25rem;
+      background: white;
+      padding: 0.25rem;
+      border-radius: 6px;
+      border: 1px solid #e1e5e9;
     }
 
     .view-btn {
-      background: transparent;
+      padding: 0.5rem 1rem;
       border: none;
-      padding: var(--spacing-xs) var(--spacing-md);
-      border-radius: var(--border-radius-sm);
-      font-size: var(--font-size-sm);
+      background: transparent;
+      border-radius: 4px;
       cursor: pointer;
-      transition: all var(--transition-fast);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #6c757d;
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: var(--spacing-xs);
+      gap: 0.5rem;
     }
 
     .view-btn.active {
-      background: var(--color-white);
-      box-shadow: var(--shadow-sm);
-      color: var(--color-primary);
+      background: #ff6200;
+      color: white;
     }
 
-    .content-section {
-      background: var(--color-white);
-      border-radius: var(--border-radius-lg);
-      box-shadow: var(--shadow-sm);
-      overflow: hidden;
+    .results-section {
+      padding: 0;
     }
 
-    .filters-section {
-      padding: var(--spacing-lg);
-      background: var(--color-gray-50);
-      border-bottom: 1px solid var(--color-gray-200);
+    .results-header {
+      padding: 1rem 2rem;
+      border-bottom: 1px solid #e1e5e9;
+      background: #f8f9fa;
     }
 
-    .employees-container {
-      min-height: 400px;
+    .results-count {
+      color: #6c757d;
+      font-size: 0.875rem;
+    }
+
+    .loading-container {
+      text-align: center;
+      padding: 3rem;
+      color: #6c757d;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e1e5e9;
+      border-top: 3px solid #ff6200;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .no-results {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: var(--spacing-4xl);
       text-align: center;
-      color: var(--color-gray-500);
+      padding: 3rem;
+      color: #6c757d;
     }
 
     .no-results-icon {
-      font-size: 3rem;
-      margin-bottom: var(--spacing-lg);
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
     }
 
-    .no-results-text {
-      font-size: var(--font-size-lg);
-      margin-bottom: var(--spacing-sm);
-    }
-
-    .no-results-subtext {
-      font-size: var(--font-size-sm);
-      color: var(--color-gray-400);
-    }
-
-    .pagination-section {
-      padding: var(--spacing-lg);
-      background: var(--color-gray-50);
-      border-top: 1px solid var(--color-gray-200);
-    }
-
-    /* Responsive */
     @media (max-width: 768px) {
-      .page-header {
+      :host {
+        padding: 1rem;
+      }
+
+      .header-content {
         flex-direction: column;
-        gap: var(--spacing-lg);
+        align-items: stretch;
+        text-align: center;
+      }
+
+      .controls-section {
+        flex-direction: column;
+        gap: 1rem;
         align-items: stretch;
       }
 
-      .header-actions {
-        justify-content: space-between;
+      .search-filter-container {
+        margin-right: 0;
       }
 
       .view-toggle {
-        order: -1;
+        justify-content: center;
       }
     }
   `;
 
   constructor() {
     super();
-    this.employees = SAMPLE_EMPLOYEES;
+    this.employees = [];
+    this.filteredEmployees = [];
+    this.paginatedEmployees = [];
     this.searchTerm = '';
     this.selectedDepartment = '';
     this.currentPage = 1;
-    this.viewMode = VIEW_MODES.TABLE;
-    this.language = document.documentElement.lang || 'en';
-
-    // Debounced search handler
-    this._debouncedSearch = debounce((searchTerm) => {
-      this.searchTerm = searchTerm;
-      this.currentPage = 1;
-    }, 300);
+    this.itemsPerPage = 10;
+    this.viewMode = 'table';
+    this.isLoading = true;
+    this.showDeleteModal = false;
+    this.employeeToDelete = null;
   }
 
   connectedCallback() {
     super.connectedCallback();
-    console.log('Employee List Page connected');
+    this.loadEmployees();
+    // Listen for employee updates from form
+    window.addEventListener('employee-updated', this.handleEmployeeUpdate.bind(this));
   }
 
-  // Computed properties
-  get filteredEmployees() {
-    return this.employees.filter(employee => {
-      const matchesSearch = !this.searchTerm || 
-        employee.firstName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        employee.lastName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        employee.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        employee.department.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        employee.position.toLowerCase().includes(this.searchTerm.toLowerCase());
-      
-      const matchesDepartment = !this.selectedDepartment || employee.department === this.selectedDepartment;
-      
-      return matchesSearch && matchesDepartment;
-    });
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener('employee-updated', this.handleEmployeeUpdate.bind(this));
   }
 
-  get paginatedEmployees() {
-    const filtered = this.filteredEmployees;
-    const itemsPerPage = APP_CONSTANTS.ITEMS_PER_PAGE;
-    const start = (this.currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
+  handleEmployeeUpdate() {
+    this.loadEmployees();
+  }
+
+  loadEmployees() {
+    this.isLoading = true;
     
-    return filtered.slice(start, end);
+    // Simulate API call
+    setTimeout(() => {
+      const storedEmployees = localStorage.getItem('employees');
+      if (storedEmployees) {
+        this.employees = JSON.parse(storedEmployees);
+      } else {
+        // Initialize with demo data if empty
+        this.employees = this.createDemoData();
+        localStorage.setItem('employees', JSON.stringify(this.employees));
+      }
+      
+      this.isLoading = false;
+      this.filterAndPaginate();
+    }, 500);
   }
 
-  get totalPages() {
-    const itemsPerPage = APP_CONSTANTS.ITEMS_PER_PAGE;
-    return Math.ceil(this.filteredEmployees.length / itemsPerPage);
+  createDemoData() {
+    return [
+      {
+        id: '1',
+        firstName: 'Ahmet',
+        lastName: 'Sourtimes',
+        email: 'ahmet@sourtimes.org',
+        phone: '+(90) 532 123 45 67',
+        department: 'Analytics',
+        position: 'Junior',
+        hireDate: '2022-09-23',
+        salary: '45000',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: '2',
+        firstName: 'Fatma',
+        lastName: 'Kaya',
+        email: 'fatma.kaya@company.com',
+        phone: '+90 555 234 5678',
+        department: 'Marketing',
+        position: 'Marketing Manager',
+        hireDate: '2021-08-20',
+        salary: '65000',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: '3',
+        firstName: 'Mehmet',
+        lastName: 'Demir',
+        email: 'mehmet.demir@company.com',
+        phone: '+90 555 345 6789',
+        department: 'Sales',
+        position: 'Sales Representative',
+        hireDate: '2023-03-10',
+        salary: '45000',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: '4',
+        firstName: 'test',
+        lastName: 'test',
+        email: 'www@www.com',
+        phone: '5300854144',
+        department: 'Engineering',
+        position: 'Senior',
+        hireDate: '2025-07-10',
+        salary: '35000',
+        createdAt: new Date().toISOString()
+      }
+    ];
   }
 
-  // Event handlers
-  _handleSearch(e) {
-    this._debouncedSearch(e.detail.searchTerm);
+  handleSearch(e) {
+    this.searchTerm = e.detail.searchTerm;
+    this.currentPage = 1;
+    this.filterAndPaginate();
   }
 
-  _handleDepartmentFilter(e) {
+  handleFilter(e) {
     this.selectedDepartment = e.detail.department;
     this.currentPage = 1;
+    this.filterAndPaginate();
   }
 
-  _handleViewModeChange(viewMode) {
-    this.viewMode = viewMode;
-  }
-
-  _handlePageChange(e) {
+  handlePageChange(e) {
     this.currentPage = e.detail.page;
+    this.filterAndPaginate();
   }
 
-  _handleAddEmployee() {
-    // Navigate to add employee page
-    import('../../router/router.js').then(({ AppRouter }) => {
-      const router = new AppRouter();
-      router.navigate('/employees/add');
+  handleViewToggle(mode) {
+    this.viewMode = mode;
+  }
+
+  handleEditEmployee(e) {
+    const employeeId = e.detail.employeeId;
+    window.history.pushState({}, '', `/employees/edit/${employeeId}`);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }
+
+  handleDeleteEmployee(e) {
+    const employeeId = e.detail.employeeId;
+    this.employeeToDelete = this.employees.find(emp => emp.id === employeeId);
+    this.showDeleteModal = true;
+  }
+
+  handleDeleteConfirm() {
+    if (!this.employeeToDelete) return;
+
+    this.employees = this.employees.filter(emp => emp.id !== this.employeeToDelete.id);
+    localStorage.setItem('employees', JSON.stringify(this.employees));
+    
+    this.showDeleteModal = false;
+    this.employeeToDelete = null;
+    this.filterAndPaginate();
+  }
+
+  handleDeleteCancel() {
+    this.showDeleteModal = false;
+    this.employeeToDelete = null;
+  }
+
+  filterAndPaginate() {
+    // Apply search filter
+    let filtered = this.employees.filter(employee => {
+      const searchLower = this.searchTerm.toLowerCase();
+      return (
+        employee.firstName.toLowerCase().includes(searchLower) ||
+        employee.lastName.toLowerCase().includes(searchLower) ||
+        employee.email.toLowerCase().includes(searchLower) ||
+        employee.phone.includes(searchLower) ||
+        employee.position.toLowerCase().includes(searchLower)
+      );
     });
+
+    // Apply department filter
+    if (this.selectedDepartment) {
+      filtered = filtered.filter(employee => 
+        employee.department === this.selectedDepartment
+      );
+    }
+
+    this.filteredEmployees = filtered;
+
+    // Apply pagination
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedEmployees = filtered.slice(startIndex, endIndex);
+  }
+
+  navigateToAddEmployee() {
+    window.history.pushState({}, '', '/employees/add');
+    window.dispatchEvent(new PopStateEvent('popstate'));
   }
 
   render() {
-    const filteredEmployees = this.filteredEmployees;
-    const paginatedEmployees = this.paginatedEmployees;
-    const totalPages = this.totalPages;
+    const totalPages = Math.ceil(this.filteredEmployees.length / this.itemsPerPage);
 
     return html`
-      <!-- Page Header -->
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">${t('employeeList.title', this.language)}</h1>
-          <div class="employee-count">
-            ${filteredEmployees.length} ${t('employeeList.totalEmployees', this.language)}
+      <div class="page-container">
+        <div class="page-header">
+          <div class="header-content">
+            <div class="header-text">
+              <h1>Employee List</h1>
+            </div>
           </div>
         </div>
 
-        <div class="header-actions">
-          <!-- View Mode Toggle -->
-          <div class="view-toggle">
-            <button 
-              class="view-btn ${this.viewMode === VIEW_MODES.TABLE ? 'active' : ''}"
-              @click="${() => this._handleViewModeChange(VIEW_MODES.TABLE)}"
-              title="${t('employeeList.viewTable', this.language)}">
-              📋 ${t('employeeList.viewTable', this.language)}
-            </button>
-            <button 
-              class="view-btn ${this.viewMode === VIEW_MODES.CARDS ? 'active' : ''}"
-              @click="${() => this._handleViewModeChange(VIEW_MODES.CARDS)}"
-              title="${t('employeeList.viewCards', this.language)}">
-              🎴 ${t('employeeList.viewCards', this.language)}
-            </button>
+        <div class="content-container">
+          <div class="controls-section">
+            <div class="search-filter-container">
+              <search-filter 
+                @search-changed=${this.handleSearch}
+                @filter-changed=${this.handleFilter}
+              ></search-filter>
+            </div>
+            
+            <div class="view-toggle">
+              <button 
+                class="view-btn ${this.viewMode === 'table' ? 'active' : ''}"
+                @click=${() => this.handleViewToggle('table')}
+              >
+                ☰ Table
+              </button>
+              <button 
+                class="view-btn ${this.viewMode === 'cards' ? 'active' : ''}"
+                @click=${() => this.handleViewToggle('cards')}
+              >
+                ⚏ Cards
+              </button>
+            </div>
           </div>
 
-          <!-- Add Employee Button -->
-          <button 
-            class="add-employee-btn"
-            @click="${this._handleAddEmployee}">
-            ➕ ${t('nav.addNew', this.language)}
-          </button>
-        </div>
-      </div>
-
-      <!-- Main Content -->
-      <div class="content-section">
-        <!-- Search and Filters -->
-        <div class="filters-section">
-          <search-filter 
-            .searchTerm="${this.searchTerm}"
-            .selectedDepartment="${this.selectedDepartment}"
-            .departments="${DEPARTMENTS}"
-            .language="${this.language}"
-            @search-changed="${this._handleSearch}"
-            @department-changed="${this._handleDepartmentFilter}">
-          </search-filter>
-        </div>
-
-        <!-- Employee List/Table -->
-        <div class="employees-container">
-          ${filteredEmployees.length === 0 ? html`
+          ${this.isLoading ? html`
+            <div class="loading-container">
+              <div class="loading-spinner"></div>
+              <p>${i18nService.t('common.loading')}</p>
+            </div>
+          ` : this.paginatedEmployees.length === 0 ? html`
             <div class="no-results">
-              <div class="no-results-icon">🔍</div>
-              <div class="no-results-text">${t('employeeList.noResults', this.language)}</div>
-              <div class="no-results-subtext">Try adjusting your search or filters</div>
+              <div class="no-results-icon">👤</div>
+              <h3>${i18nService.t('common.noResults')}</h3>
             </div>
           ` : html`
-            ${this.viewMode === VIEW_MODES.TABLE ? html`
-              <employee-table 
-                .employees="${paginatedEmployees}"
-                .language="${this.language}">
-              </employee-table>
-            ` : html`
-              <employee-cards 
-                .employees="${paginatedEmployees}"
-                .language="${this.language}">
-              </employee-cards>
-            `}
+            <div class="results-header">
+              <div class="results-count">
+                ${i18nService.t('pagination.showing', {
+                  start: (this.currentPage - 1) * this.itemsPerPage + 1,
+                  end: Math.min(this.currentPage * this.itemsPerPage, this.filteredEmployees.length),
+                  total: this.filteredEmployees.length
+                })}
+              </div>
+            </div>
+
+            <div class="results-section">
+              ${this.viewMode === 'table' ? html`
+                <employee-table 
+                  .employees=${this.paginatedEmployees}
+                  @edit-employee=${this.handleEditEmployee}
+                  @delete-employee=${this.handleDeleteEmployee}
+                ></employee-table>
+              ` : html`
+                <employee-cards 
+                  .employees=${this.paginatedEmployees}
+                  @edit-employee=${this.handleEditEmployee}
+                  @delete-employee=${this.handleDeleteEmployee}
+                ></employee-cards>
+              `}
+            </div>
+
+            ${totalPages > 1 ? html`
+              <pagination-component
+                .currentPage=${this.currentPage}
+                .totalPages=${totalPages}
+                @page-changed=${this.handlePageChange}
+              ></pagination-component>
+            ` : ''}
           `}
         </div>
-
-        <!-- Pagination -->
-        ${totalPages > 1 ? html`
-          <div class="pagination-section">
-            <pagination-component
-              .currentPage="${this.currentPage}"
-              .totalPages="${totalPages}"
-              .totalItems="${filteredEmployees.length}"
-              .itemsPerPage="${APP_CONSTANTS.ITEMS_PER_PAGE}"
-              .language="${this.language}"
-              @page-changed="${this._handlePageChange}">
-            </pagination-component>
-          </div>
-        ` : ''}
       </div>
+
+      <app-modal
+        ?isOpen=${this.showDeleteModal}
+        type="danger"
+        title="${i18nService.t('common.confirm')}"
+        message="${this.employeeToDelete ? 
+          `${this.employeeToDelete.firstName} ${this.employeeToDelete.lastName} adlı çalışanı silmek istediğinizden emin misiniz?` : ''}"
+        confirmText="${i18nService.t('common.delete')}"
+        cancelText="${i18nService.t('common.cancel')}"
+        @modal-confirm=${this.handleDeleteConfirm}
+        @modal-cancel=${this.handleDeleteCancel}
+      ></app-modal>
     `;
+  }
+
+  toggleLanguage() {
+    // Language toggle fonksiyonu ekleyelim
+    const newLang = document.documentElement.lang === 'tr' ? 'en' : 'tr';
+    document.documentElement.lang = newLang;
+    window.dispatchEvent(new CustomEvent('language-changed', {
+      detail: { language: newLang }
+    }));
   }
 }
 
