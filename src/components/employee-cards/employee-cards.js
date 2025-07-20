@@ -1,239 +1,165 @@
 import { LitElement, html, css } from 'lit';
-import { t } from '../../i18n/i18n.service.js';
-import { formatDate } from '../../utils/helpers.js';
-import { Router } from '@vaadin/router';
+import { i18nService } from '../../i18n/i18n.service.js';
 
-class EmployeeCards extends LitElement {
+export class EmployeeCards extends LitElement {
   static properties = {
-    employees: { type: Array },
-    language: { type: String }
+    employees: { type: Array }
   };
 
   static styles = css`
     :host {
       display: block;
-      padding: var(--spacing-lg);
     }
 
     .cards-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: var(--spacing-lg);
-      min-height: 300px;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
     }
 
     .employee-card {
-      background: var(--color-white);
-      border: 1px solid var(--color-gray-200);
-      border-radius: var(--border-radius-lg);
-      box-shadow: var(--shadow-sm);
-      overflow: hidden;
-      transition: all var(--transition-fast);
-      position: relative;
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
     }
 
     .employee-card:hover {
-      box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+      border-color: var(--ing-orange);
     }
 
     .card-header {
-      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-      color: var(--color-white);
-      padding: var(--spacing-lg);
-      position: relative;
-    }
-
-    .card-checkbox {
-      position: absolute;
-      top: var(--spacing-sm);
-      right: var(--spacing-sm);
-      cursor: pointer;
-      transform: scale(1.2);
-    }
-
-    .employee-name {
-      font-size: var(--font-size-lg);
-      font-weight: var(--font-weight-semibold);
-      margin-bottom: var(--spacing-xs);
-      line-height: var(--line-height-tight);
-    }
-
-    .employee-position {
-      font-size: var(--font-size-sm);
-      opacity: 0.9;
-      margin-bottom: var(--spacing-sm);
-    }
-
-    .department-badge {
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: var(--color-white);
-      padding: var(--spacing-xs) var(--spacing-sm);
-      border-radius: var(--border-radius-md);
-      font-size: var(--font-size-xs);
-      font-weight: var(--font-weight-medium);
-      display: inline-block;
-    }
-
-    .card-body {
-      padding: var(--spacing-lg);
-    }
-
-    .employee-details {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-md);
-    }
-
-    .detail-row {
       display: flex;
       align-items: center;
-      gap: var(--spacing-sm);
-      font-size: var(--font-size-sm);
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
 
-    .detail-icon {
-      width: 20px;
-      height: 20px;
+    .avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--ing-orange), var(--ing-blue));
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--color-gray-100);
-      border-radius: var(--border-radius-sm);
-      flex-shrink: 0;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
     }
 
-    .detail-label {
-      font-weight: var(--font-weight-medium);
-      color: var(--color-gray-600);
-      min-width: 80px;
+    .employee-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
     }
 
-    .detail-value {
-      color: var(--color-gray-800);
+    .employee-title {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin: 0.25rem 0 0 0;
+    }
+
+    .card-body {
+      margin-bottom: 1.5rem;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .info-row:hover {
+      background: var(--surface-secondary);
+    }
+
+    .info-icon {
+      width: 24px;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .info-text {
       flex: 1;
+      color: var(--text-primary);
     }
 
-    .email-link {
-      color: var(--color-primary);
-      text-decoration: none;
-    }
-
-    .email-link:hover {
-      text-decoration: underline;
+    .department-badge {
+      background: linear-gradient(135deg, var(--ing-orange), #ff8533);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .card-actions {
-      padding: var(--spacing-md) var(--spacing-lg);
-      background: var(--color-gray-50);
-      border-top: 1px solid var(--color-gray-200);
       display: flex;
-      gap: var(--spacing-sm);
+      gap: 0.75rem;
       justify-content: flex-end;
     }
 
-    .action-btn {
-      background: var(--color-white);
-      border: 1px solid var(--color-gray-300);
-      padding: var(--spacing-sm) var(--spacing-md);
-      border-radius: var(--border-radius-md);
-      font-size: var(--font-size-sm);
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
-      gap: var(--spacing-xs);
-      font-weight: var(--font-weight-medium);
+      gap: 0.5rem;
     }
 
-    .action-btn.edit {
-      color: var(--color-primary);
-      border-color: var(--color-primary);
+    .btn-edit {
+      background: var(--info-color);
+      color: white;
     }
 
-    .action-btn.edit:hover {
-      background: var(--color-primary);
-      color: var(--color-white);
+    .btn-edit:hover {
+      background: #2980b9;
+      transform: translateY(-1px);
     }
 
-    .action-btn.delete {
-      color: var(--color-error);
-      border-color: var(--color-error);
+    .btn-delete {
+      background: var(--error-color);
+      color: white;
     }
 
-    .action-btn.delete:hover {
-      background: var(--color-error);
-      color: var(--color-white);
+    .btn-delete:hover {
+      background: #c0392b;
+      transform: translateY(-1px);
     }
 
-    /* Position badge in header */
-    .position-indicator {
-      position: absolute;
-      top: var(--spacing-sm);
-      left: var(--spacing-sm);
-      background: rgba(255, 255, 255, 0.2);
-      color: var(--color-white);
-      padding: var(--spacing-xs) var(--spacing-sm);
-      border-radius: var(--border-radius-md);
-      font-size: var(--font-size-xs);
-      font-weight: var(--font-weight-medium);
-    }
-
-    /* Empty state */
-    .empty-state {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: var(--spacing-4xl);
-      color: var(--color-gray-500);
-    }
-
-    .empty-icon {
-      font-size: 3rem;
-      margin-bottom: var(--spacing-lg);
-    }
-
-    /* Responsive */
     @media (max-width: 768px) {
-      :host {
-        padding: var(--spacing-md);
-      }
-
       .cards-container {
         grid-template-columns: 1fr;
-        gap: var(--spacing-md);
+        gap: 1rem;
       }
 
       .employee-card {
-        margin-bottom: var(--spacing-sm);
+        padding: 1rem;
       }
 
       .card-actions {
         flex-direction: column;
       }
 
-      .action-btn {
+      .btn {
         justify-content: center;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .card-header {
-        padding: var(--spacing-md);
-      }
-
-      .card-body {
-        padding: var(--spacing-md);
-      }
-
-      .detail-row {
-        flex-wrap: wrap;
-      }
-
-      .detail-label {
-        min-width: auto;
-        width: 100%;
-        margin-bottom: var(--spacing-xs);
       }
     }
   `;
@@ -241,129 +167,106 @@ class EmployeeCards extends LitElement {
   constructor() {
     super();
     this.employees = [];
-    this.language = 'en';
   }
 
-  _handleEdit(employee) {
-    Router.go(`/employees/edit/${employee.id}`);
+  handleEdit(employee) {
+    this.dispatchEvent(new CustomEvent('edit-employee', {
+      detail: { employeeId: employee.id },
+      bubbles: true,
+      composed: true
+    }));
   }
 
-  _handleDelete(employee) {
-    if (confirm(`Are you sure you want to delete ${employee.firstName} ${employee.lastName}?`)) {
-      console.log('Delete employee:', employee);
-      // Dispatch custom event for parent to handle
-      this.dispatchEvent(new CustomEvent('employee-deleted', {
-        detail: { employee },
-        bubbles: true
-      }));
-    }
+  handleDelete(employee) {
+    this.dispatchEvent(new CustomEvent('delete-employee', {
+      detail: { employeeId: employee.id },
+      bubbles: true,
+      composed: true
+    }));
   }
 
-  _renderEmployeeCard(employee) {
-    return html`
-      <div class="employee-card">
-        <!-- Card Header -->
-        <div class="card-header">
-          <input 
-            type="checkbox" 
-            class="card-checkbox" 
-            id="card-emp-${employee.id}"
-          />
-          
-          <div class="position-indicator">
-            ${employee.position}
-          </div>
-          
-          <div class="employee-name">
-            ${employee.firstName} ${employee.lastName}
-          </div>
-          
-          <div class="employee-position">
-            ${employee.position} • ${employee.department}
-          </div>
-          
-          <div class="department-badge">
-            ${employee.department}
-          </div>
-        </div>
+  getInitials(firstName, lastName) {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  }
 
-        <!-- Card Body -->
-        <div class="card-body">
-          <div class="employee-details">
-            <!-- Employment Date -->
-            <div class="detail-row">
-              <div class="detail-icon">📅</div>
-              <div class="detail-label">${t('table.dateOfEmployment', this.language)}:</div>
-              <div class="detail-value">${formatDate(employee.dateOfEmployment)}</div>
-            </div>
+  formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('tr-TR');
+  }
 
-            <!-- Birth Date -->
-            <div class="detail-row">
-              <div class="detail-icon">🎂</div>
-              <div class="detail-label">${t('table.dateOfBirth', this.language)}:</div>
-              <div class="detail-value">${formatDate(employee.dateOfBirth)}</div>
-            </div>
-
-            <!-- Phone -->
-            <div class="detail-row">
-              <div class="detail-icon">📞</div>
-              <div class="detail-label">${t('table.phone', this.language)}:</div>
-              <div class="detail-value">
-                <a href="tel:${employee.phone}" class="email-link">
-                  ${employee.phone}
-                </a>
-              </div>
-            </div>
-
-            <!-- Email -->
-            <div class="detail-row">
-              <div class="detail-icon">✉️</div>
-              <div class="detail-label">${t('table.email', this.language)}:</div>
-              <div class="detail-value">
-                <a href="mailto:${employee.email}" class="email-link">
-                  ${employee.email}
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card Actions -->
-        <div class="card-actions">
-          <button
-            class="action-btn edit"
-            @click="${() => this._handleEdit(employee)}"
-            title="${t('actions.edit', this.language)}"
-          >
-            ✏️ ${t('actions.edit', this.language)}
-          </button>
-          <button
-            class="action-btn delete"
-            @click="${() => this._handleDelete(employee)}"
-            title="${t('actions.delete', this.language)}"
-          >
-            🗑️ ${t('actions.delete', this.language)}
-          </button>
-        </div>
-      </div>
-    `;
+  formatSalary(salary) {
+    if (!salary) return '';
+    return new Intl.NumberFormat('tr-TR', {
+      style: 'currency',
+      currency: 'TRY'
+    }).format(salary);
   }
 
   render() {
-    if (!this.employees || this.employees.length === 0) {
-      return html`
-        <div class="cards-container">
-          <div class="empty-state">
-            <div class="empty-icon">🎴</div>
-            <p>${t('employeeList.noResults', this.language)}</p>
-          </div>
-        </div>
-      `;
-    }
-
     return html`
       <div class="cards-container">
-        ${this.employees.map(employee => this._renderEmployeeCard(employee))}
+        ${this.employees.map(employee => html`
+          <div class="employee-card">
+            <div class="card-header">
+              <div class="avatar">
+                ${this.getInitials(employee.firstName, employee.lastName)}
+              </div>
+              <div>
+                <h3 class="employee-name">
+                  ${employee.firstName} ${employee.lastName}
+                </h3>
+                <p class="employee-title">${employee.position}</p>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="info-row">
+                <span class="info-icon">📧</span>
+                <span class="info-text">${employee.email}</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-icon">📱</span>
+                <span class="info-text">${employee.phone}</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-icon">🏢</span>
+                <span class="info-text">
+                  <span class="department-badge">${employee.department}</span>
+                </span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-icon">📅</span>
+                <span class="info-text">${this.formatDate(employee.hireDate)}</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-icon">💰</span>
+                <span class="info-text">${this.formatSalary(employee.salary)}</span>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <button 
+                class="btn btn-edit"
+                @click=${() => this.handleEdit(employee)}
+                title="${i18nService.t('common.edit')}"
+              >
+                ✏️ ${i18nService.t('common.edit')}
+              </button>
+              <button 
+                class="btn btn-delete"
+                @click=${() => this.handleDelete(employee)}
+                title="${i18nService.t('common.delete')}"
+              >
+                🗑️ ${i18nService.t('common.delete')}
+              </button>
+            </div>
+          </div>
+        `)}
       </div>
     `;
   }

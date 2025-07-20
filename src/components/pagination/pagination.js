@@ -1,138 +1,77 @@
 import { LitElement, html, css } from 'lit';
-import { t } from '../../i18n/i18n.service.js';
+import { i18nService } from '../../i18n/i18n.service.js';
 
-class PaginationComponent extends LitElement {
+export class PaginationComponent extends LitElement {
   static properties = {
     currentPage: { type: Number },
-    totalPages: { type: Number },
-    totalItems: { type: Number },
-    itemsPerPage: { type: Number },
-    language: { type: String }
+    totalPages: { type: Number }
   };
 
   static styles = css`
     :host {
       display: block;
+      margin-top: 2rem;
     }
 
     .pagination-container {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      flex-wrap: wrap;
-      gap: var(--spacing-md);
-    }
-
-    .pagination-info {
-      font-size: var(--font-size-sm);
-      color: var(--color-gray-600);
-    }
-
-    .pagination-controls {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
+      gap: 0.5rem;
     }
 
     .pagination-btn {
-      background: var(--color-white);
-      border: 1px solid var(--color-gray-300);
-      color: var(--color-gray-700);
-      padding: var(--spacing-sm) var(--spacing-md);
-      border-radius: var(--border-radius-md);
-      font-size: var(--font-size-sm);
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border-color);
+      background: white;
+      color: var(--text-primary);
+      border-radius: 8px;
       cursor: pointer;
-      transition: all var(--transition-fast);
-      min-width: 40px;
-      height: 40px;
+      transition: all 0.3s ease;
+      font-size: 0.875rem;
+      font-weight: 500;
+      min-width: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
-      text-decoration: none;
     }
 
     .pagination-btn:hover:not(:disabled) {
-      background: var(--color-gray-50);
-      border-color: var(--color-gray-400);
+      border-color: var(--ing-orange);
+      background: var(--ing-orange);
+      color: white;
+      transform: translateY(-1px);
     }
 
     .pagination-btn:disabled {
-      background: var(--color-gray-100);
-      color: var(--color-gray-400);
+      opacity: 0.5;
       cursor: not-allowed;
-      opacity: 0.6;
+      transform: none;
     }
 
     .pagination-btn.active {
-      background: var(--color-primary);
-      border-color: var(--color-primary);
-      color: var(--color-white);
+      background: var(--ing-orange);
+      border-color: var(--ing-orange);
+      color: white;
     }
 
-    .pagination-btn.active:hover {
-      background: var(--color-primary-dark);
-      border-color: var(--color-primary-dark);
+    .pagination-btn.ellipsis {
+      border: none;
+      background: none;
+      cursor: default;
     }
 
-    .page-numbers {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
+    .pagination-btn.ellipsis:hover {
+      background: none;
+      border: none;
+      transform: none;
     }
 
-    .ellipsis {
-      padding: var(--spacing-sm);
-      color: var(--color-gray-500);
-      font-size: var(--font-size-sm);
-    }
-
-    .nav-btn {
-      font-weight: var(--font-weight-medium);
-      min-width: 80px;
-    }
-
-    /* Responsive */
     @media (max-width: 768px) {
-      .pagination-container {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .pagination-info {
-        order: 2;
-      }
-
-      .pagination-controls {
-        order: 1;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-
       .pagination-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
         min-width: 36px;
-        height: 36px;
-        padding: var(--spacing-xs) var(--spacing-sm);
-      }
-
-      .nav-btn {
-        min-width: 70px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .page-numbers {
-        gap: 2px;
-      }
-
-      .pagination-btn {
-        min-width: 32px;
-        height: 32px;
-        font-size: var(--font-size-xs);
-      }
-
-      .nav-btn {
-        min-width: 60px;
-        font-size: var(--font-size-xs);
       }
     }
   `;
@@ -141,141 +80,90 @@ class PaginationComponent extends LitElement {
     super();
     this.currentPage = 1;
     this.totalPages = 1;
-    this.totalItems = 0;
-    this.itemsPerPage = 10;
-    this.language = 'en';
   }
 
-  get startItem() {
-    return (this.currentPage - 1) * this.itemsPerPage + 1;
-  }
-
-  get endItem() {
-    return Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
-  }
-
-  get visiblePages() {
-    const pages = [];
-    const maxVisible = 5; // Maximum number of page buttons to show
-    const half = Math.floor(maxVisible / 2);
-    
-    let start = Math.max(1, this.currentPage - half);
-    let end = Math.min(this.totalPages, start + maxVisible - 1);
-    
-    // Adjust start if we're near the end
-    if (end - start < maxVisible - 1) {
-      start = Math.max(1, end - maxVisible + 1);
+  handlePageChange(page) {
+    if (page === this.currentPage || page < 1 || page > this.totalPages) {
+      return;
     }
-    
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
+
+    this.dispatchEvent(new CustomEvent('page-changed', {
+      detail: { page },
+      bubbles: true,
+      composed: true
+    }));
+  }
+
+  getVisiblePages() {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+
+    for (
+      let i = Math.max(2, this.currentPage - delta);
+      i <= Math.min(this.totalPages - 1, this.currentPage + delta);
+      i++
+    ) {
+      range.push(i);
     }
-    
-    return pages;
-  }
 
-  get showFirstEllipsis() {
-    return this.visiblePages[0] > 2;
-  }
-
-  get showLastEllipsis() {
-    return this.visiblePages[this.visiblePages.length - 1] < this.totalPages - 1;
-  }
-
-  _handlePageChange(page) {
-    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
-      this.dispatchEvent(new CustomEvent('page-changed', {
-        detail: { page },
-        bubbles: true
-      }));
+    if (this.currentPage - delta > 2) {
+      rangeWithDots.push(1, '...');
+    } else {
+      rangeWithDots.push(1);
     }
-  }
 
-  _handlePrevious() {
-    if (this.currentPage > 1) {
-      this._handlePageChange(this.currentPage - 1);
+    rangeWithDots.push(...range);
+
+    if (this.currentPage + delta < this.totalPages - 1) {
+      rangeWithDots.push('...', this.totalPages);
+    } else {
+      rangeWithDots.push(this.totalPages);
     }
-  }
 
-  _handleNext() {
-    if (this.currentPage < this.totalPages) {
-      this._handlePageChange(this.currentPage + 1);
-    }
-  }
-
-  _renderPageButton(page) {
-    const isActive = page === this.currentPage;
-    
-    return html`
-      <button
-        class="pagination-btn ${isActive ? 'active' : ''}"
-        @click="${() => this._handlePageChange(page)}"
-        aria-label="Page ${page}"
-        aria-current="${isActive ? 'page' : 'false'}"
-      >
-        ${page}
-      </button>
-    `;
+    return rangeWithDots;
   }
 
   render() {
     if (this.totalPages <= 1) {
-      return html`
-        <div class="pagination-container">
-          <div class="pagination-info">
-            ${this.totalItems} ${t('employeeList.totalEmployees', this.language)}
-          </div>
-        </div>
-      `;
+      return html``;
     }
+
+    const visiblePages = this.getVisiblePages();
 
     return html`
       <div class="pagination-container">
-        <!-- Pagination Info -->
-        <div class="pagination-info">
-          Showing ${this.startItem} to ${this.endItem} of ${this.totalItems} ${t('employeeList.totalEmployees', this.language)}
-        </div>
+        <button
+          class="pagination-btn"
+          @click=${() => this.handlePageChange(this.currentPage - 1)}
+          ?disabled=${this.currentPage === 1}
+          title="${i18nService.t('pagination.previous')}"
+        >
+          ← ${i18nService.t('pagination.previous')}
+        </button>
 
-        <!-- Pagination Controls -->
-        <div class="pagination-controls">
-          <!-- Previous Button -->
-          <button
-            class="pagination-btn nav-btn"
-            @click="${this._handlePrevious}"
-            ?disabled="${this.currentPage === 1}"
-            aria-label="Previous page"
-          >
-            ← Previous
-          </button>
+        ${visiblePages.map(page => 
+          page === '...' ? html`
+            <button class="pagination-btn ellipsis" disabled>...</button>
+          ` : html`
+            <button
+              class="pagination-btn ${page === this.currentPage ? 'active' : ''}"
+              @click=${() => this.handlePageChange(page)}
+              title="${i18nService.t('pagination.page')} ${page}"
+            >
+              ${page}
+            </button>
+          `
+        )}
 
-          <!-- Page Numbers -->
-          <div class="page-numbers">
-            <!-- First page if not visible -->
-            ${this.visiblePages[0] > 1 ? html`
-              ${this._renderPageButton(1)}
-              ${this.showFirstEllipsis ? html`<span class="ellipsis">...</span>` : ''}
-            ` : ''}
-
-            <!-- Visible page numbers -->
-            ${this.visiblePages.map(page => this._renderPageButton(page))}
-
-            <!-- Last page if not visible -->
-            ${this.visiblePages[this.visiblePages.length - 1] < this.totalPages ? html`
-              ${this.showLastEllipsis ? html`<span class="ellipsis">...</span>` : ''}
-              ${this._renderPageButton(this.totalPages)}
-            ` : ''}
-          </div>
-
-          <!-- Next Button -->
-          <button
-            class="pagination-btn nav-btn"
-            @click="${this._handleNext}"
-            ?disabled="${this.currentPage === this.totalPages}"
-            aria-label="Next page"
-          >
-            Next →
-          </button>
-        </div>
+        <button
+          class="pagination-btn"
+          @click=${() => this.handlePageChange(this.currentPage + 1)}
+          ?disabled=${this.currentPage === this.totalPages}
+          title="${i18nService.t('pagination.next')}"
+        >
+          ${i18nService.t('pagination.next')} →
+        </button>
       </div>
     `;
   }

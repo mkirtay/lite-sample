@@ -1,92 +1,77 @@
 export const en = {
-  // Navigation
-  nav: {
-    employees: 'Employees',
-    addNew: 'Add New',
-    logout: 'Logout'
-  },
-  
-  // Employee List
-  employeeList: {
-    title: 'Employee List',
+  // Common
+  common: {
     search: 'Search employees...',
+    filter: 'Filter by department',
     allDepartments: 'All Departments',
-    viewTable: 'Table View',
-    viewCards: 'Card View',
+    table: 'Table',
+    cards: 'Cards',
+    language: 'Language',
+    loading: 'Loading...',
     noResults: 'No employees found',
-    totalEmployees: 'employees'
-  },
-  
-  // Employee Form
-  employeeForm: {
-    addTitle: 'Add Employee',
-    editTitle: 'Edit Employee',
-    editingEmployee: 'You are editing {name}',
-    firstName: 'First Name',
-    lastName: 'Last Name',
-    dateOfEmployment: 'Date of Employment',
-    dateOfBirth: 'Date of Birth',
-    phone: 'Phone',
-    email: 'Email',
-    department: 'Department',
-    position: 'Position',
-    pleaseSelect: 'Please Select',
+    cancel: 'Cancel',
     save: 'Save',
-    cancel: 'Cancel'
+    update: 'Update',
+    delete: 'Delete',
+    edit: 'Edit',
+    add: 'Add',
+    confirm: 'Confirm'
   },
-  
-  // Table Headers
-  table: {
+
+  // Employee
+  employee: {
+    title: 'Employee Management',
+    subtitle: 'Manage your team efficiently',
     firstName: 'First Name',
     lastName: 'Last Name',
-    dateOfEmployment: 'Date of Employment',
-    dateOfBirth: 'Date of Birth',
-    phone: 'Phone',
     email: 'Email',
+    phone: 'Phone',
     department: 'Department',
     position: 'Position',
-    actions: 'Actions'
+    hireDate: 'Hire Date',
+    salary: 'Salary',
+    actions: 'Actions',
+    addEmployee: 'Add Employee',
+    editEmployee: 'Edit Employee',
+    addDescription: 'Fill out the form below to add a new employee to your team.',
+    editDescription: 'Update the information below to modify employee details.',
+    selectDepartment: 'Select Department'
   },
-  
-  // Actions
-  actions: {
-    edit: 'Edit',
-    delete: 'Delete',
-    view: 'View'
+
+  // Departments
+  departments: {
+    engineering: 'Engineering',
+    marketing: 'Marketing',
+    sales: 'Sales',
+    hr: 'Human Resources',
+    finance: 'Finance'
   },
-  
-  // Confirmations
-  confirmations: {
-    deleteTitle: 'Are you sure?',
-    deleteMessage: 'Selected Employee record of {name} will be deleted',
-    proceed: 'Proceed',
-    cancel: 'Cancel'
-  },
-  
-  // Validation Messages
+
+  // Validation
   validation: {
     required: 'This field is required',
     invalidEmail: 'Please enter a valid email address',
+    emailExists: 'This email address is already in use',
     invalidPhone: 'Please enter a valid phone number',
-    invalidName: 'Please enter a valid name',
-    emailExists: 'This email address is already registered',
-    phoneExists: 'This phone number is already registered'
+    minLength: 'Must be at least {min} characters long',
+    futureDate: 'Date cannot be in the future',
+    invalidSalary: 'Please enter a valid salary amount'
   },
-  
-  // Notifications
-  notifications: {
-    employeeAdded: 'Employee added successfully',
-    employeeUpdated: 'Employee updated successfully',
-    employeeDeleted: 'Employee deleted successfully',
-    error: 'An error occurred. Please try again.'
+
+  // Pagination
+  pagination: {
+    previous: 'Previous',
+    next: 'Next',
+    showing: 'Showing {start}-{end} of {total} employees',
+    page: 'Page'
   },
-  
-  // Common
-  common: {
-    loading: 'Loading...',
-    error: 'Error',
-    success: 'Success',
-    warning: 'Warning',
-    info: 'Information'
+
+  // Positions
+  positions: {
+    junior: 'Junior',
+    senior: 'Senior',
+    lead: 'Lead',
+    manager: 'Manager',
+    director: 'Director'
   }
 }; 
