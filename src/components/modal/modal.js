@@ -3,7 +3,7 @@ import { i18nService } from '../../i18n/i18n.service.js';
 
 export class Modal extends LitElement {
   static properties = {
-    isOpen: { type: Boolean },
+    isOpen: { type: Boolean, reflect: true },
     title: { type: String },
     message: { type: String },
     type: { type: String }, // 'confirm', 'alert', 'info'
