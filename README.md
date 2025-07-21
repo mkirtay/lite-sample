@@ -27,14 +27,3 @@ npm start          # Start development server
 npm test           # Run unit tests
 npm run test:watch # Run tests in watch mode
 ```
-
-## Features
-
-- Employee CRUD operations
-- Search and filtering
-- Responsive design
-- Turkish/English localization
-- Form validation
-- Unit tests (93% coverage)
-
-Built with LitElement, Vaadin Router, and localStorage for persistence. 
