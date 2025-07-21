@@ -1,5 +1,8 @@
 import { LitElement, html, css } from 'lit';
+import { Router } from '@vaadin/router';
 import { initializeRouter } from './router/router.js';
+import './components/employee-list/employee-list-page.js';
+import { i18nService } from './i18n/i18n.service.js';
 
 /**
  * Main Application Component
@@ -146,34 +149,67 @@ class EmployeeApp extends LitElement {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--ing-dark-blue);
       text-decoration: none;
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      font-weight: 600;
+      transition: opacity 0.3s ease;
     }
 
-    .logo-svg {
-      height: 32px;
-      width: auto;
-      object-fit: contain;
+    .app-logo:hover {
+      opacity: 0.9;
     }
 
     .logo-icon {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, var(--ing-orange), var(--ing-blue));
+      width: 40px;
+      height: 40px;
+      background: var(--ing-orange);
+      color: white;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-weight: bold;
+      font-weight: 700;
+      font-size: 1rem;
     }
 
     .header-controls {
       display: flex;
       align-items: center;
       gap: 1rem;
+    }
+
+    .add-employee-btn {
+      background: var(--ing-orange);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .add-employee-btn:hover {
+      background: #e55a2b;
+      transform: translateY(-1px);
+    }
+
+    .employees-icon {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: bold;
     }
 
     .language-switch {
@@ -216,19 +252,57 @@ class EmployeeApp extends LitElement {
         width: 28px;
         height: 28px;
       }
+
+      .header-controls {
+        gap: 0.5rem;
+      }
+
+      .add-employee-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+
+      .add-employee-btn span {
+        display: none;
+      }
+
+      .language-switch {
+        padding: 0.5rem;
+        min-width: 36px;
+      }
     }
   `;
 
   constructor() {
     super();
-    this.language = document.documentElement.lang || 'tr';
+    // Load saved language preference or default to Turkish
+    const savedLanguage = localStorage.getItem('preferred-language');
+    this.language = savedLanguage || document.documentElement.lang || 'tr';
+    
+    // Set initial document language
+    document.documentElement.lang = this.language;
+    
     this.isLoading = true;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    
+    // Subscribe to language changes
+    i18nService.subscribe(this);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    
+    // Unsubscribe from language changes
+    i18nService.unsubscribe(this);
   }
 
   firstUpdated() {
     // Initialize router after component is rendered
     setTimeout(() => {
-      const outlet = this.shadowRoot.querySelector('.router-outlet');
+      const outlet = this.shadowRoot.querySelector('#main-content');
       console.log('🎯 Router outlet found:', outlet);
       
       if (outlet) {
@@ -245,13 +319,27 @@ class EmployeeApp extends LitElement {
   }
 
   toggleLanguage() {
+    const oldLang = this.language;
     this.language = this.language === 'tr' ? 'en' : 'tr';
     document.documentElement.lang = this.language;
+    
+    console.log('🔄 Language toggled from', oldLang, 'to', this.language);
+    
+    // Store language preference
+    localStorage.setItem('preferred-language', this.language);
     
     // Trigger re-render of components
     window.dispatchEvent(new CustomEvent('language-changed', {
       detail: { language: this.language }
     }));
+    
+    // Force re-render of this component
+    this.requestUpdate();
+  }
+
+  navigateToAddEmployee() {
+    window.history.pushState({}, '', '/employees/add');
+    window.dispatchEvent(new PopStateEvent('popstate'));
   }
 
   render() {
@@ -259,30 +347,37 @@ class EmployeeApp extends LitElement {
       ${this.isLoading ? html`
         <div class="loading-screen">
           <div class="loading-spinner"></div>
-          <div class="loading-text">Loading Employee Management System...</div>
+          <div class="loading-text">${i18nService.t('app.loadingText')}</div>
         </div>
       ` : ''}
 
       <header class="app-header">
         <a href="/employees" class="app-logo">
-          <img src="/public/assets/images/logo.svg" alt="ING Logo" class="logo-svg" />
-          Employee Management
+          <div class="logo-icon">ING</div>
+          ${i18nService.t('app.title')}
         </a>
         
         <div class="header-controls">
           <button 
+            class="add-employee-btn"
+            @click=${this.navigateToAddEmployee}
+            title="${i18nService.t('app.addEmployeeTitle')}"
+          >
+            <span class="employees-icon">+</span>
+            ${i18nService.t('app.addEmployee')}
+          </button>
+          
+          <button 
             class="language-switch"
             @click=${this.toggleLanguage}
-            title="Switch Language"
+            title="${i18nService.t('app.switchLanguage')}"
           >
             🌐 ${this.language.toUpperCase()}
           </button>
         </div>
       </header>
 
-      <main class="app-main">
-        <div class="router-outlet"></div>
-      </main>
+      <main id="main-content"></main>
     `;
   }
 }

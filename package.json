@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Employee Management Application with LitElement",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "web-dev-server --node-resolve --open --watch",
     "test": "web-test-runner --coverage",

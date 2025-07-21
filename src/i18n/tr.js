@@ -1,4 +1,13 @@
 export const tr = {
+  // App
+  app: {
+    title: 'Çalışan Yönetimi',
+    loadingText: 'Çalışan Yönetim Sistemi Yükleniyor...',
+    addEmployee: 'Çalışan Ekle',
+    addEmployeeTitle: 'Yeni Çalışan Ekle',
+    switchLanguage: 'Dil Değiştir'
+  },
+
   // Common
   common: {
     search: 'Çalışan ara...',
@@ -29,17 +38,27 @@ export const tr = {
     department: 'Departman',
     position: 'Pozisyon',
     hireDate: 'İşe Başlama Tarihi',
+    dateOfEmployment: 'İşe Başlama Tarihi',
+    dateOfBirth: 'Doğum Tarihi',
     salary: 'Maaş',
     actions: 'İşlemler',
     addEmployee: 'Çalışan Ekle',
     editEmployee: 'Çalışan Düzenle',
     addDescription: 'Ekibinize yeni bir çalışan eklemek için aşağıdaki formu doldurun.',
     editDescription: 'Çalışan bilgilerini güncellemek için aşağıdaki bilgileri düzenleyin.',
-    selectDepartment: 'Departman Seçin'
+    selectDepartment: 'Departman Seçin',
+    selectPosition: 'Pozisyon Seçin',
+    deleteConfirmation: '{name} adlı çalışanı silmek istediğinizden emin misiniz?',
+    saveConfirmation: 'Çalışan bilgilerini kaydetmek istediğinizden emin misiniz?',
+    updateConfirmation: 'Çalışan bilgilerini güncellemek istediğinizden emin misiniz?',
+    employed: 'İşe Başlama',
+    born: 'Doğum'
   },
 
   // Departments
   departments: {
+    analytics: 'Analitik',
+    tech: 'Teknoloji',
     engineering: 'Mühendislik',
     marketing: 'Pazarlama',
     sales: 'Satış',
@@ -69,9 +88,7 @@ export const tr = {
   // Positions
   positions: {
     junior: 'Junior',
-    senior: 'Senior',
-    lead: 'Uzman',
-    manager: 'Müdür',
-    director: 'Direktör'
+    mid: 'Mid',
+    senior: 'Senior'
   }
 }; 

@@ -1,6 +1,9 @@
 import { LitElement, html, css } from 'lit';
 import { i18nService } from '../../i18n/i18n.service.js';
 
+// Import modal component
+import '../modal/modal.js';
+
 export class EmployeeFormPage extends LitElement {
   static properties = {
     employeeId: { type: String },
@@ -8,59 +11,48 @@ export class EmployeeFormPage extends LitElement {
     employees: { type: Array, state: true },
     errors: { type: Object, state: true },
     isLoading: { type: Boolean, state: true },
-    isEditMode: { type: Boolean, state: true }
+    isEditMode: { type: Boolean, state: true },
+    showConfirmModal: { type: Boolean, state: true }
   };
 
   static styles = css`
     :host {
       display: block;
       min-height: calc(100vh - 120px);
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 2rem;
+      background: #f8f9fa;
+      padding: 2rem 1rem;
     }
 
     .form-container {
       max-width: 600px;
       margin: 0 auto;
       background: white;
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      border: 1px solid #e1e5e9;
       padding: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .form-container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--ing-orange), var(--ing-blue));
     }
 
     .form-header {
-      text-align: center;
       margin-bottom: 2rem;
     }
 
     .form-title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--ing-dark-blue);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #2c3e50;
       margin: 0 0 0.5rem 0;
     }
 
     .form-subtitle {
-      color: var(--text-secondary);
+      color: #6c757d;
       margin: 0;
+      font-size: 0.875rem;
     }
 
     .form-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 1.5rem;
+      gap: 1.25rem;
     }
 
     @media (min-width: 768px) {
@@ -79,101 +71,97 @@ export class EmployeeFormPage extends LitElement {
     }
 
     .form-label {
-      font-weight: 600;
-      color: var(--text-primary);
+      font-weight: 500;
+      color: #495057;
       margin-bottom: 0.5rem;
-      font-size: 0.9rem;
+      font-size: 0.875rem;
     }
 
     .required::after {
       content: ' *';
-      color: var(--error-color);
+      color: #dc3545;
     }
 
     .form-input,
     .form-select {
-      padding: 0.875rem 1rem;
-      border: 2px solid var(--border-color);
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: all 0.3s ease;
+      padding: 0.75rem;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      transition: border-color 0.15s ease;
       background: white;
     }
 
     .form-input:focus,
     .form-select:focus {
       outline: none;
-      border-color: var(--ing-orange);
-      box-shadow: 0 0 0 3px rgba(255, 98, 0, 0.1);
+      border-color: #ff6200;
+      box-shadow: 0 0 0 2px rgba(255, 98, 0, 0.1);
     }
 
     .form-input.error,
     .form-select.error {
-      border-color: var(--error-color);
+      border-color: #dc3545;
     }
 
     .error-message {
-      color: var(--error-color);
-      font-size: 0.875rem;
+      color: #dc3545;
+      font-size: 0.75rem;
       margin-top: 0.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
     }
 
     .form-actions {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       justify-content: flex-end;
       margin-top: 2rem;
       padding-top: 1.5rem;
-      border-top: 1px solid var(--border-color);
+      border-top: 1px solid #e9ecef;
     }
 
     .btn {
-      padding: 0.875rem 2rem;
+      padding: 0.75rem 1.5rem;
       border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.15s ease;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
+      min-width: 100px;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--ing-orange), #ff8533);
+      background: #ff6200;
       color: white;
     }
 
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(255, 98, 0, 0.3);
+    .btn-primary:hover:not(:disabled) {
+      background: #e55a00;
     }
 
     .btn-secondary {
-      background: var(--surface-secondary);
-      color: var(--text-primary);
-      border: 2px solid var(--border-color);
+      background: #f8f9fa;
+      color: #495057;
+      border: 1px solid #ced4da;
     }
 
-    .btn-secondary:hover {
-      background: var(--border-color);
+    .btn-secondary:hover:not(:disabled) {
+      background: #e9ecef;
     }
 
     .btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
-      transform: none;
     }
 
     .loading-spinner {
-      width: 20px;
-      height: 20px;
+      width: 16px;
+      height: 16px;
       border: 2px solid transparent;
       border-top: 2px solid currentColor;
       border-radius: 50%;
@@ -186,13 +174,23 @@ export class EmployeeFormPage extends LitElement {
       }
     }
 
-    .success-message {
-      background: #d4edda;
-      color: #155724;
-      padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      border: 1px solid #c3e6cb;
+    @media (max-width: 768px) {
+      :host {
+        padding: 1rem 0.5rem;
+      }
+
+      .form-container {
+        padding: 1.5rem;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
     }
   `;
 
@@ -201,17 +199,18 @@ export class EmployeeFormPage extends LitElement {
     this.employee = {
       firstName: '',
       lastName: '',
-      email: '',
+      dateOfEmployment: '',
+      dateOfBirth: '1990-01-15',
       phone: '',
+      email: '',
       department: '',
-      position: '',
-      hireDate: '',
-      salary: ''
+      position: ''
     };
     this.employees = JSON.parse(localStorage.getItem('employees')) || [];
     this.errors = {};
     this.isLoading = false;
     this.isEditMode = false;
+    this.showConfirmModal = false;
   }
 
   connectedCallback() {
@@ -220,6 +219,16 @@ export class EmployeeFormPage extends LitElement {
     if (this.employeeId) {
       this.loadEmployee();
     }
+    
+    // Subscribe to language changes
+    i18nService.subscribe(this);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    
+    // Unsubscribe from language changes
+    i18nService.unsubscribe(this);
   }
 
   extractEmployeeId() {
@@ -281,17 +290,12 @@ export class EmployeeFormPage extends LitElement {
         }
         break;
       
-      case 'hireDate':
+      case 'dateOfEmployment':
+      case 'dateOfBirth':
         if (!value) {
           errors[name] = i18nService.t('validation.required');
         } else if (new Date(value) > new Date()) {
           errors[name] = i18nService.t('validation.futureDate');
-        }
-        break;
-      
-      case 'salary':
-        if (!value || isNaN(value) || Number(value) <= 0) {
-          errors[name] = i18nService.t('validation.invalidSalary');
         }
         break;
     }
@@ -308,7 +312,7 @@ export class EmployeeFormPage extends LitElement {
   }
 
   validateForm() {
-    const fields = ['firstName', 'lastName', 'email', 'phone', 'department', 'position', 'hireDate', 'salary'];
+    const fields = ['firstName', 'lastName', 'email', 'phone', 'department', 'position', 'dateOfEmployment', 'dateOfBirth'];
     let isValid = true;
 
     fields.forEach(field => {
@@ -335,6 +339,12 @@ export class EmployeeFormPage extends LitElement {
       return;
     }
 
+    // Show confirmation modal instead of directly saving
+    this.showConfirmModal = true;
+  }
+
+  handleConfirmSave() {
+    this.showConfirmModal = false;
     this.isLoading = true;
 
     // Simulate API call
@@ -362,6 +372,10 @@ export class EmployeeFormPage extends LitElement {
     }, 1000);
   }
 
+  handleCancelSave() {
+    this.showConfirmModal = false;
+  }
+
   createEmployee() {
     const newEmployee = {
       ...this.employee,
@@ -369,7 +383,7 @@ export class EmployeeFormPage extends LitElement {
       createdAt: new Date().toISOString()
     };
     
-    this.employees.push(newEmployee);
+    this.employees.unshift(newEmployee); // En başa ekle (push yerine unshift)
     localStorage.setItem('employees', JSON.stringify(this.employees));
   }
 
@@ -418,7 +432,7 @@ export class EmployeeFormPage extends LitElement {
                 autocomplete="given-name"
               />
               ${this.errors.firstName ? html`
-                <div class="error-message">⚠️ ${this.errors.firstName}</div>
+                <div class="error-message">${this.errors.firstName}</div>
               ` : ''}
             </div>
 
@@ -436,7 +450,7 @@ export class EmployeeFormPage extends LitElement {
                 autocomplete="family-name"
               />
               ${this.errors.lastName ? html`
-                <div class="error-message">⚠️ ${this.errors.lastName}</div>
+                <div class="error-message">${this.errors.lastName}</div>
               ` : ''}
             </div>
 
@@ -454,7 +468,7 @@ export class EmployeeFormPage extends LitElement {
                 autocomplete="email"
               />
               ${this.errors.email ? html`
-                <div class="error-message">⚠️ ${this.errors.email}</div>
+                <div class="error-message">${this.errors.email}</div>
               ` : ''}
             </div>
 
@@ -472,7 +486,7 @@ export class EmployeeFormPage extends LitElement {
                 autocomplete="tel"
               />
               ${this.errors.phone ? html`
-                <div class="error-message">⚠️ ${this.errors.phone}</div>
+                <div class="error-message">${this.errors.phone}</div>
               ` : ''}
             </div>
 
@@ -488,14 +502,11 @@ export class EmployeeFormPage extends LitElement {
                 class="form-select ${this.errors.department ? 'error' : ''}"
               >
                 <option value="">${i18nService.t('employee.selectDepartment')}</option>
-                <option value="Engineering">${i18nService.t('departments.engineering')}</option>
-                <option value="Marketing">${i18nService.t('departments.marketing')}</option>
-                <option value="Sales">${i18nService.t('departments.sales')}</option>
-                <option value="HR">${i18nService.t('departments.hr')}</option>
-                <option value="Finance">${i18nService.t('departments.finance')}</option>
+                <option value="Analytics">Analytics</option>
+                <option value="Tech">Tech</option>
               </select>
               ${this.errors.department ? html`
-                <div class="error-message">⚠️ ${this.errors.department}</div>
+                <div class="error-message">${this.errors.department}</div>
               ` : ''}
             </div>
 
@@ -503,54 +514,56 @@ export class EmployeeFormPage extends LitElement {
               <label class="form-label required" for="position">
                 ${i18nService.t('employee.position')}
               </label>
-              <input
-                type="text"
+              <select
                 id="position"
                 name="position"
                 .value=${this.employee.position}
-                @input=${this.handleInputChange}
-                class="form-input ${this.errors.position ? 'error' : ''}"
-                autocomplete="organization-title"
-              />
+                @change=${this.handleInputChange}
+                class="form-select ${this.errors.position ? 'error' : ''}"
+              >
+                <option value="">${i18nService.t('employee.selectPosition')}</option>
+                <option value="Junior">${i18nService.t('positions.junior')}</option>
+                <option value="Mid">${i18nService.t('positions.mid')}</option>
+                <option value="Senior">${i18nService.t('positions.senior')}</option>
+              </select>
               ${this.errors.position ? html`
-                <div class="error-message">⚠️ ${this.errors.position}</div>
+                <div class="error-message">${this.errors.position}</div>
               ` : ''}
             </div>
 
             <div class="form-group">
-              <label class="form-label required" for="hireDate">
-                ${i18nService.t('employee.hireDate')}
+              <label class="form-label required" for="dateOfEmployment">
+                ${i18nService.t('employee.dateOfEmployment')}
               </label>
               <input
                 type="date"
-                id="hireDate"
-                name="hireDate"
-                .value=${this.employee.hireDate}
+                id="dateOfEmployment"
+                name="dateOfEmployment"
+                .value=${this.employee.dateOfEmployment}
                 @input=${this.handleInputChange}
-                class="form-input ${this.errors.hireDate ? 'error' : ''}"
+                class="form-input ${this.errors.dateOfEmployment ? 'error' : ''}"
                 max=${new Date().toISOString().split('T')[0]}
               />
-              ${this.errors.hireDate ? html`
-                <div class="error-message">⚠️ ${this.errors.hireDate}</div>
+              ${this.errors.dateOfEmployment ? html`
+                <div class="error-message">${this.errors.dateOfEmployment}</div>
               ` : ''}
             </div>
 
             <div class="form-group">
-              <label class="form-label required" for="salary">
-                ${i18nService.t('employee.salary')}
+              <label class="form-label required" for="dateOfBirth">
+                ${i18nService.t('employee.dateOfBirth')}
               </label>
               <input
-                type="number"
-                id="salary"
-                name="salary"
-                .value=${this.employee.salary}
+                type="date"
+                id="dateOfBirth"
+                name="dateOfBirth"
+                .value=${this.employee.dateOfBirth}
                 @input=${this.handleInputChange}
-                class="form-input ${this.errors.salary ? 'error' : ''}"
-                min="0"
-                step="1000"
+                class="form-input ${this.errors.dateOfBirth ? 'error' : ''}"
+                max=${new Date().toISOString().split('T')[0]}
               />
-              ${this.errors.salary ? html`
-                <div class="error-message">⚠️ ${this.errors.salary}</div>
+              ${this.errors.dateOfBirth ? html`
+                <div class="error-message">${this.errors.dateOfBirth}</div>
               ` : ''}
             </div>
           </div>
@@ -578,6 +591,19 @@ export class EmployeeFormPage extends LitElement {
           </div>
         </form>
       </div>
+
+      <app-modal
+        ?isOpen=${this.showConfirmModal}
+        type="info"
+        title="${i18nService.t('common.confirm')}"
+        message="${this.isEditMode ? 
+          i18nService.t('employee.updateConfirmation') : 
+          i18nService.t('employee.saveConfirmation')}"
+        confirmText="${this.isEditMode ? i18nService.t('common.update') : i18nService.t('common.save')}"
+        cancelText="${i18nService.t('common.cancel')}"
+        @modal-confirm=${this.handleConfirmSave}
+        @modal-cancel=${this.handleCancelSave}
+      ></app-modal>
     `;
   }
 }

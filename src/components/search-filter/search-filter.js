@@ -70,6 +70,20 @@ export class SearchFilter extends LitElement {
     this.selectedDepartment = '';
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    
+    // Subscribe to language changes
+    i18nService.subscribe(this);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    
+    // Unsubscribe from language changes
+    i18nService.unsubscribe(this);
+  }
+
   handleSearchChange(e) {
     this.searchTerm = e.target.value;
     this.dispatchEvent(new CustomEvent('search-changed', {
@@ -108,12 +122,8 @@ export class SearchFilter extends LitElement {
             @change=${this.handleFilterChange}
           >
             <option value="">${i18nService.t('common.allDepartments')}</option>
-            <option value="Analytics">Analytics</option>
-            <option value="Engineering">${i18nService.t('departments.engineering')}</option>
-            <option value="Marketing">${i18nService.t('departments.marketing')}</option>
-            <option value="Sales">${i18nService.t('departments.sales')}</option>
-            <option value="HR">${i18nService.t('departments.hr')}</option>
-            <option value="Finance">${i18nService.t('departments.finance')}</option>
+            <option value="Analytics">${i18nService.t('departments.analytics')}</option>
+            <option value="Tech">${i18nService.t('departments.tech')}</option>
           </select>
         </div>
       </div>

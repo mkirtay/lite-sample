@@ -249,11 +249,17 @@ export class EmployeeListPage extends LitElement {
     this.loadEmployees();
     // Listen for employee updates from form
     window.addEventListener('employee-updated', this.handleEmployeeUpdate.bind(this));
+    
+    // Subscribe to language changes
+    i18nService.subscribe(this);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     window.removeEventListener('employee-updated', this.handleEmployeeUpdate.bind(this));
+    
+    // Unsubscribe from language changes
+    i18nService.unsubscribe(this);
   }
 
   handleEmployeeUpdate() {
@@ -280,56 +286,44 @@ export class EmployeeListPage extends LitElement {
   }
 
   createDemoData() {
-    return [
-      {
-        id: '1',
-        firstName: 'Ahmet',
-        lastName: 'Sourtimes',
-        email: 'ahmet@sourtimes.org',
-        phone: '+(90) 532 123 45 67',
-        department: 'Analytics',
-        position: 'Junior',
-        hireDate: '2022-09-23',
-        salary: '45000',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: '2',
-        firstName: 'Fatma',
-        lastName: 'Kaya',
-        email: 'fatma.kaya@company.com',
-        phone: '+90 555 234 5678',
-        department: 'Marketing',
-        position: 'Marketing Manager',
-        hireDate: '2021-08-20',
-        salary: '65000',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: '3',
-        firstName: 'Mehmet',
-        lastName: 'Demir',
-        email: 'mehmet.demir@company.com',
-        phone: '+90 555 345 6789',
-        department: 'Sales',
-        position: 'Sales Representative',
-        hireDate: '2023-03-10',
-        salary: '45000',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: '4',
-        firstName: 'test',
-        lastName: 'test',
-        email: 'www@www.com',
-        phone: '5300854144',
-        department: 'Engineering',
-        position: 'Senior',
-        hireDate: '2025-07-10',
-        salary: '35000',
-        createdAt: new Date().toISOString()
-      }
-    ];
+    // Same generation logic as in store for consistency
+    const firstNames = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Lisa', 'Robert', 'Emily', 'James', 'Maria', 'Christopher', 'Jennifer', 'William', 'Linda', 'Daniel', 'Elizabeth', 'Matthew', 'Barbara', 'Anthony', 'Susan', 'Mark', 'Jessica', 'Donald', 'Karen', 'Steven', 'Nancy', 'Paul', 'Betty', 'Andrew', 'Helen', 'Joshua', 'Sandra', 'Kenneth', 'Donna', 'Kevin', 'Carol', 'Brian', 'Ruth', 'George', 'Sharon', 'Timothy', 'Michelle', 'Ronald', 'Laura', 'Jason', 'Sarah', 'Edward', 'Kimberly', 'Jeffrey', 'Deborah'];
+    
+    const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores', 'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts'];
+    
+    const departments = ['Analytics', 'Tech'];
+    const positions = ['Junior', 'Mid', 'Senior'];
+    
+    const getRandomDate = (startYear, endYear) => {
+      const start = new Date(startYear, 0, 1);
+      const end = new Date(endYear, 11, 31);
+      const randomDate = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+      return randomDate.toISOString().split('T')[0];
+    };
+    
+    const getRandomPhone = () => {
+      const randomNum = Math.floor(Math.random() * 900000000) + 100000000;
+      return `+90 5${randomNum.toString().slice(0, 2)} ${randomNum.toString().slice(2, 5)} ${randomNum.toString().slice(5, 9)}`;
+    };
+
+    return Array.from({ length: 65 }, (_, index) => {
+      const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+      const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+      const department = departments[Math.floor(Math.random() * departments.length)];
+      const position = positions[Math.floor(Math.random() * positions.length)];
+      
+      return {
+        id: (index + 1).toString(),
+        firstName,
+        lastName,
+        dateOfEmployment: getRandomDate(2018, 2024),
+        dateOfBirth: getRandomDate(1980, 2000),
+        phone: getRandomPhone(),
+        email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@company.com`,
+        department,
+        position
+      };
+    });
   }
 
   handleSearch(e) {
@@ -422,7 +416,7 @@ export class EmployeeListPage extends LitElement {
         <div class="page-header">
           <div class="header-content">
             <div class="header-text">
-              <h1>Employee List</h1>
+              <h1>${i18nService.t('employee.title')}</h1>
             </div>
           </div>
         </div>
@@ -441,13 +435,13 @@ export class EmployeeListPage extends LitElement {
                 class="view-btn ${this.viewMode === 'table' ? 'active' : ''}"
                 @click=${() => this.handleViewToggle('table')}
               >
-                ☰ Table
+                ☰ ${i18nService.t('common.table')}
               </button>
               <button 
                 class="view-btn ${this.viewMode === 'cards' ? 'active' : ''}"
                 @click=${() => this.handleViewToggle('cards')}
               >
-                ⚏ Cards
+                ⚏ ${i18nService.t('common.cards')}
               </button>
             </div>
           </div>
@@ -505,22 +499,15 @@ export class EmployeeListPage extends LitElement {
         type="danger"
         title="${i18nService.t('common.confirm')}"
         message="${this.employeeToDelete ? 
-          `${this.employeeToDelete.firstName} ${this.employeeToDelete.lastName} adlı çalışanı silmek istediğinizden emin misiniz?` : ''}"
+          i18nService.t('employee.deleteConfirmation', {
+            name: `${this.employeeToDelete.firstName} ${this.employeeToDelete.lastName}`
+          }) : ''}"
         confirmText="${i18nService.t('common.delete')}"
         cancelText="${i18nService.t('common.cancel')}"
         @modal-confirm=${this.handleDeleteConfirm}
         @modal-cancel=${this.handleDeleteCancel}
       ></app-modal>
     `;
-  }
-
-  toggleLanguage() {
-    // Language toggle fonksiyonu ekleyelim
-    const newLang = document.documentElement.lang === 'tr' ? 'en' : 'tr';
-    document.documentElement.lang = newLang;
-    window.dispatchEvent(new CustomEvent('language-changed', {
-      detail: { language: newLang }
-    }));
   }
 }
 

@@ -1,53 +1,52 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { generateId } from '../utils/helpers.js';
 
-// Initial sample data
-const initialEmployees = [
-  {
-    id: '1',
-    firstName: 'Ahmet',
-    lastName: 'Yılmaz',
-    dateOfEmployment: '2022-01-15',
-    dateOfBirth: '1990-05-10',
-    phone: '+90 532 123 4567',
-    email: 'ahmet.yilmaz@company.com',
-    department: 'Tech',
-    position: 'Senior'
-  },
-  {
-    id: '2',
-    firstName: 'Ayşe',
-    lastName: 'Kaya',
-    dateOfEmployment: '2021-06-10',
-    dateOfBirth: '1988-12-03',
-    phone: '+90 533 234 5678',
-    email: 'ayse.kaya@company.com',
-    department: 'Analytics',
-    position: 'Medior'
-  },
-  {
-    id: '3',
-    firstName: 'Mehmet',
-    lastName: 'Demir',
-    dateOfEmployment: '2020-03-20',
-    dateOfBirth: '1985-08-15',
-    phone: '+90 534 345 6789',
-    email: 'mehmet.demir@company.com',
-    department: 'Tech',
-    position: 'Senior'
-  },
-  {
-    id: '4',
-    firstName: 'Fatma',
-    lastName: 'Öztürk',
-    dateOfEmployment: '2021-09-05',
-    dateOfBirth: '1992-02-28',
-    phone: '+90 535 456 7890',
-    email: 'fatma.ozturk@company.com',
-    department: 'Analytics',
-    position: 'Junior'
-  }
-];
+// Sample names and data for generating realistic employees
+const firstNames = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Lisa', 'Robert', 'Emily', 'James', 'Maria', 'Christopher', 'Jennifer', 'William', 'Linda', 'Daniel', 'Elizabeth', 'Matthew', 'Barbara', 'Anthony', 'Susan', 'Mark', 'Jessica', 'Donald', 'Karen', 'Steven', 'Nancy', 'Paul', 'Betty', 'Andrew', 'Helen', 'Joshua', 'Sandra', 'Kenneth', 'Donna', 'Kevin', 'Carol', 'Brian', 'Ruth', 'George', 'Sharon', 'Timothy', 'Michelle', 'Ronald', 'Laura', 'Jason', 'Sarah', 'Edward', 'Kimberly', 'Jeffrey', 'Deborah'];
+
+const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores', 'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts'];
+
+const departments = ['Analytics', 'Tech'];
+const positions = ['Junior', 'Mid', 'Senior'];
+
+// Function to generate random date between two dates
+const getRandomDate = (startYear, endYear) => {
+  const start = new Date(startYear, 0, 1);
+  const end = new Date(endYear, 11, 31);
+  const randomDate = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+  return randomDate.toISOString().split('T')[0];
+};
+
+// Function to generate random phone number
+const getRandomPhone = () => {
+  const randomNum = Math.floor(Math.random() * 900000000) + 100000000;
+  return `+90 5${randomNum.toString().slice(0, 2)} ${randomNum.toString().slice(2, 5)} ${randomNum.toString().slice(5, 9)}`;
+};
+
+// Generate 65 realistic employees
+const generateEmployees = () => {
+  return Array.from({ length: 65 }, (_, index) => {
+    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+    const department = departments[Math.floor(Math.random() * departments.length)];
+    const position = positions[Math.floor(Math.random() * positions.length)];
+    
+    return {
+      id: (index + 1).toString(),
+      firstName,
+      lastName,
+      dateOfEmployment: getRandomDate(2018, 2024),
+      dateOfBirth: getRandomDate(1980, 2000),
+      phone: getRandomPhone(),
+      email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@company.com`,
+      department,
+      position
+    };
+  });
+};
+
+// Initial sample data - generated dynamically
+const initialEmployees = generateEmployees();
 
 const employeeSlice = createSlice({
   name: 'employees',

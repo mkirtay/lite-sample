@@ -169,6 +169,20 @@ export class EmployeeCards extends LitElement {
     this.employees = [];
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    
+    // Subscribe to language changes
+    i18nService.subscribe(this);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    
+    // Unsubscribe from language changes
+    i18nService.unsubscribe(this);
+  }
+
   handleEdit(employee) {
     this.dispatchEvent(new CustomEvent('edit-employee', {
       detail: { employeeId: employee.id },
@@ -240,12 +254,12 @@ export class EmployeeCards extends LitElement {
               
               <div class="info-row">
                 <span class="info-icon">📅</span>
-                <span class="info-text">${this.formatDate(employee.hireDate)}</span>
+                <span class="info-text">${i18nService.t('employee.employed')}: ${this.formatDate(employee.dateOfEmployment)}</span>
               </div>
               
               <div class="info-row">
-                <span class="info-icon">💰</span>
-                <span class="info-text">${this.formatSalary(employee.salary)}</span>
+                <span class="info-icon">🎂</span>
+                <span class="info-text">${i18nService.t('employee.born')}: ${this.formatDate(employee.dateOfBirth)}</span>
               </div>
             </div>
 
