@@ -70,6 +70,20 @@ export class SearchFilter extends LitElement {
     this.selectedDepartment = '';
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    
+    // Subscribe to language changes
+    i18nService.subscribe(this);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    
+    // Unsubscribe from language changes
+    i18nService.unsubscribe(this);
+  }
+
   handleSearchChange(e) {
     this.searchTerm = e.target.value;
     this.dispatchEvent(new CustomEvent('search-changed', {

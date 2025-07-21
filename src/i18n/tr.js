@@ -29,13 +29,17 @@ export const tr = {
     department: 'Departman',
     position: 'Pozisyon',
     hireDate: 'İşe Başlama Tarihi',
+    dateOfBirth: 'Doğum Tarihi',
     salary: 'Maaş',
     actions: 'İşlemler',
     addEmployee: 'Çalışan Ekle',
     editEmployee: 'Çalışan Düzenle',
     addDescription: 'Ekibinize yeni bir çalışan eklemek için aşağıdaki formu doldurun.',
     editDescription: 'Çalışan bilgilerini güncellemek için aşağıdaki bilgileri düzenleyin.',
-    selectDepartment: 'Departman Seçin'
+    selectDepartment: 'Departman Seçin',
+    deleteConfirmation: '{name} adlı çalışanı silmek istediğinizden emin misiniz?',
+    saveConfirmation: 'Çalışan bilgilerini kaydetmek istediğinizden emin misiniz?',
+    updateConfirmation: 'Çalışan bilgilerini güncellemek istediğinizden emin misiniz?'
   },
 
   // Departments

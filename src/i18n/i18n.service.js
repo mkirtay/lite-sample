@@ -8,10 +8,32 @@ class I18nService {
       en,
       tr
     };
+    this.subscribers = new Set();
 
     // Listen for language changes
     window.addEventListener('language-changed', (e) => {
+      console.log('🌐 Language changed to:', e.detail.language);
       this.currentLanguage = e.detail.language;
+      this.notifySubscribers();
+    });
+  }
+
+  // Add a component as subscriber
+  subscribe(component) {
+    this.subscribers.add(component);
+  }
+
+  // Remove a component from subscribers
+  unsubscribe(component) {
+    this.subscribers.delete(component);
+  }
+
+  // Notify all subscribed components to re-render
+  notifySubscribers() {
+    this.subscribers.forEach(component => {
+      if (component.requestUpdate) {
+        component.requestUpdate();
+      }
     });
   }
 
@@ -55,13 +77,13 @@ class I18nService {
 
   /**
    * Interpolate parameters in translation string
-   * @param {string} text - Text with placeholders like {key}
-   * @param {Object} params - Parameters to replace
-   * @returns {string} Interpolated text
+   * @param {string} str - Translation string with placeholders
+   * @param {Object} params - Parameters to interpolate
+   * @returns {string} Interpolated string
    */
-  interpolate(text, params) {
-    return text.replace(/\{([^}]+)\}/g, (match, key) => {
-      return params.hasOwnProperty(key) ? params[key] : match;
+  interpolate(str, params) {
+    return str.replace(/\{(\w+)\}/g, (match, key) => {
+      return params[key] !== undefined ? params[key] : match;
     });
   }
 
@@ -91,7 +113,27 @@ class I18nService {
   getAvailableLanguages() {
     return Object.keys(this.translations);
   }
+
+  /**
+   * Check if a translation key exists
+   * @param {string} key - Translation key
+   * @returns {boolean} True if key exists
+   */
+  hasKey(key) {
+    const keys = key.split('.');
+    let translation = this.translations[this.currentLanguage];
+
+    for (const k of keys) {
+      if (translation && typeof translation === 'object' && k in translation) {
+        translation = translation[k];
+      } else {
+        return false;
+      }
+    }
+
+    return typeof translation === 'string';
+  }
 }
 
-// Export singleton instance
+// Create singleton instance
 export const i18nService = new I18nService(); 

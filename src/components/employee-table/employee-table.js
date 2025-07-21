@@ -138,6 +138,20 @@ export class EmployeeTable extends LitElement {
     this.employees = [];
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    
+    // Subscribe to language changes
+    i18nService.subscribe(this);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    
+    // Unsubscribe from language changes
+    i18nService.unsubscribe(this);
+  }
+
   handleEdit(employee) {
     this.dispatchEvent(new CustomEvent('edit-employee', {
       detail: { employeeId: employee.id },
@@ -177,15 +191,15 @@ export class EmployeeTable extends LitElement {
               <th class="checkbox-col">
                 <input type="checkbox" class="checkbox" />
               </th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Date of Employment</th>
-              <th>Date of Birth</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Department</th>
-              <th>Position</th>
-              <th>Actions</th>
+              <th>${i18nService.t('employee.firstName')}</th>
+              <th>${i18nService.t('employee.lastName')}</th>
+              <th>${i18nService.t('employee.hireDate')}</th>
+              <th>${i18nService.t('employee.dateOfBirth')}</th>
+              <th>${i18nService.t('employee.phone')}</th>
+              <th>${i18nService.t('employee.email')}</th>
+              <th>${i18nService.t('employee.department')}</th>
+              <th>${i18nService.t('employee.position')}</th>
+              <th>${i18nService.t('employee.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -213,14 +227,14 @@ export class EmployeeTable extends LitElement {
                     <button 
                       class="btn btn-edit"
                       @click=${() => this.handleEdit(employee)}
-                      title="Edit"
+                      title="${i18nService.t('common.edit')}"
                     >
                       ✏️
                     </button>
                     <button 
                       class="btn btn-delete"
                       @click=${() => this.handleDelete(employee)}
-                      title="Delete"
+                      title="${i18nService.t('common.delete')}"
                     >
                       🗑️
                     </button>

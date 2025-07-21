@@ -169,6 +169,20 @@ export class EmployeeCards extends LitElement {
     this.employees = [];
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    
+    // Subscribe to language changes
+    i18nService.subscribe(this);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    
+    // Unsubscribe from language changes
+    i18nService.unsubscribe(this);
+  }
+
   handleEdit(employee) {
     this.dispatchEvent(new CustomEvent('edit-employee', {
       detail: { employeeId: employee.id },

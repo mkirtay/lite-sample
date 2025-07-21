@@ -82,6 +82,20 @@ export class PaginationComponent extends LitElement {
     this.totalPages = 1;
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    
+    // Subscribe to language changes
+    i18nService.subscribe(this);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    
+    // Unsubscribe from language changes
+    i18nService.unsubscribe(this);
+  }
+
   handlePageChange(page) {
     if (page === this.currentPage || page < 1 || page > this.totalPages) {
       return;

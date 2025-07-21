@@ -1,5 +1,6 @@
 import { LitElement, html, css } from 'lit';
 import { initializeRouter } from './router/router.js';
+import { i18nService } from './i18n/i18n.service.js';
 
 /**
  * Main Application Component
@@ -176,6 +177,39 @@ class EmployeeApp extends LitElement {
       gap: 1rem;
     }
 
+    .add-employee-btn {
+      background: var(--ing-orange);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .add-employee-btn:hover {
+      background: #e55a2b;
+      transform: translateY(-1px);
+    }
+
+    .employees-icon {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: bold;
+    }
+
     .language-switch {
       background: var(--surface-secondary);
       border: 1px solid var(--border-color);
@@ -216,13 +250,51 @@ class EmployeeApp extends LitElement {
         width: 28px;
         height: 28px;
       }
+
+      .header-controls {
+        gap: 0.5rem;
+      }
+
+      .add-employee-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+
+      .add-employee-btn span {
+        display: none;
+      }
+
+      .language-switch {
+        padding: 0.5rem;
+        min-width: 36px;
+      }
     }
   `;
 
   constructor() {
     super();
-    this.language = document.documentElement.lang || 'tr';
+    // Load saved language preference or default to Turkish
+    const savedLanguage = localStorage.getItem('preferred-language');
+    this.language = savedLanguage || document.documentElement.lang || 'tr';
+    
+    // Set initial document language
+    document.documentElement.lang = this.language;
+    
     this.isLoading = true;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    
+    // Subscribe to language changes
+    i18nService.subscribe(this);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    
+    // Unsubscribe from language changes
+    i18nService.unsubscribe(this);
   }
 
   firstUpdated() {
@@ -245,13 +317,27 @@ class EmployeeApp extends LitElement {
   }
 
   toggleLanguage() {
+    const oldLang = this.language;
     this.language = this.language === 'tr' ? 'en' : 'tr';
     document.documentElement.lang = this.language;
+    
+    console.log('🔄 Language toggled from', oldLang, 'to', this.language);
+    
+    // Store language preference
+    localStorage.setItem('preferred-language', this.language);
     
     // Trigger re-render of components
     window.dispatchEvent(new CustomEvent('language-changed', {
       detail: { language: this.language }
     }));
+    
+    // Force re-render of this component
+    this.requestUpdate();
+  }
+
+  navigateToAddEmployee() {
+    window.history.pushState({}, '', '/employees/add');
+    window.dispatchEvent(new PopStateEvent('popstate'));
   }
 
   render() {
@@ -265,11 +351,20 @@ class EmployeeApp extends LitElement {
 
       <header class="app-header">
         <a href="/employees" class="app-logo">
-          <img src="/public/assets/images/logo.svg" alt="ING Logo" class="logo-svg" />
+          <div class="logo-icon">ING</div>
           Employee Management
         </a>
         
         <div class="header-controls">
+          <button 
+            class="add-employee-btn"
+            @click=${this.navigateToAddEmployee}
+            title="Add New Employee"
+          >
+            <span class="employees-icon">+</span>
+            Add Employee
+          </button>
+          
           <button 
             class="language-switch"
             @click=${this.toggleLanguage}

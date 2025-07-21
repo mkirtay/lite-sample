@@ -249,11 +249,17 @@ export class EmployeeListPage extends LitElement {
     this.loadEmployees();
     // Listen for employee updates from form
     window.addEventListener('employee-updated', this.handleEmployeeUpdate.bind(this));
+    
+    // Subscribe to language changes
+    i18nService.subscribe(this);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     window.removeEventListener('employee-updated', this.handleEmployeeUpdate.bind(this));
+    
+    // Unsubscribe from language changes
+    i18nService.unsubscribe(this);
   }
 
   handleEmployeeUpdate() {
@@ -422,7 +428,7 @@ export class EmployeeListPage extends LitElement {
         <div class="page-header">
           <div class="header-content">
             <div class="header-text">
-              <h1>Employee List</h1>
+              <h1>${i18nService.t('employee.title')}</h1>
             </div>
           </div>
         </div>
@@ -441,13 +447,13 @@ export class EmployeeListPage extends LitElement {
                 class="view-btn ${this.viewMode === 'table' ? 'active' : ''}"
                 @click=${() => this.handleViewToggle('table')}
               >
-                ☰ Table
+                ☰ ${i18nService.t('common.table')}
               </button>
               <button 
                 class="view-btn ${this.viewMode === 'cards' ? 'active' : ''}"
                 @click=${() => this.handleViewToggle('cards')}
               >
-                ⚏ Cards
+                ⚏ ${i18nService.t('common.cards')}
               </button>
             </div>
           </div>
@@ -505,22 +511,15 @@ export class EmployeeListPage extends LitElement {
         type="danger"
         title="${i18nService.t('common.confirm')}"
         message="${this.employeeToDelete ? 
-          `${this.employeeToDelete.firstName} ${this.employeeToDelete.lastName} adlı çalışanı silmek istediğinizden emin misiniz?` : ''}"
+          i18nService.t('employee.deleteConfirmation', {
+            name: `${this.employeeToDelete.firstName} ${this.employeeToDelete.lastName}`
+          }) : ''}"
         confirmText="${i18nService.t('common.delete')}"
         cancelText="${i18nService.t('common.cancel')}"
         @modal-confirm=${this.handleDeleteConfirm}
         @modal-cancel=${this.handleDeleteCancel}
       ></app-modal>
     `;
-  }
-
-  toggleLanguage() {
-    // Language toggle fonksiyonu ekleyelim
-    const newLang = document.documentElement.lang === 'tr' ? 'en' : 'tr';
-    document.documentElement.lang = newLang;
-    window.dispatchEvent(new CustomEvent('language-changed', {
-      detail: { language: newLang }
-    }));
   }
 }
 
