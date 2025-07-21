@@ -1,6 +1,9 @@
 import { LitElement, html, css } from 'lit';
 import { i18nService } from '../../i18n/i18n.service.js';
 
+// Import UI components
+import '../ui/index.js';
+
 export class Modal extends LitElement {
   static properties = {
     isOpen: { type: Boolean },
@@ -143,69 +146,6 @@ export class Modal extends LitElement {
       justify-content: flex-end;
     }
 
-    .btn {
-      padding: 0.625rem 1.25rem;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      min-width: 80px;
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .btn-primary {
-      background: #ff6200;
-      color: white;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background: #e55a00;
-    }
-
-    .btn-danger {
-      background: #dc2626;
-      color: white;
-    }
-
-    .btn-danger:hover:not(:disabled) {
-      background: #b91c1c;
-    }
-
-    .btn-secondary {
-      background: white;
-      color: #374151;
-      border: 1px solid #d1d5db;
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-      background: #f9fafb;
-    }
-
-    .loading-spinner {
-      width: 14px;
-      height: 14px;
-      border: 2px solid transparent;
-      border-top: 2px solid currentColor;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
     @media (max-width: 768px) {
       .modal-backdrop {
         padding: 0.5rem;
@@ -226,11 +166,6 @@ export class Modal extends LitElement {
       .modal-footer {
         flex-direction: column;
       }
-
-      .btn {
-        width: 100%;
-        justify-content: center;
-      }
     }
   `;
 
@@ -247,18 +182,14 @@ export class Modal extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.addEventListener('keydown', this.handleKeydown);
-    
-    // Subscribe to language changes
     i18nService.subscribe(this);
+    document.addEventListener('keydown', this.handleKeydown);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.removeEventListener('keydown', this.handleKeydown);
-    
-    // Unsubscribe from language changes
     i18nService.unsubscribe(this);
+    document.removeEventListener('keydown', this.handleKeydown);
   }
 
   handleKeydown = (e) => {
@@ -345,24 +276,24 @@ export class Modal extends LitElement {
           </div>
 
           <div class="modal-footer">
-            <button 
-              class="btn btn-secondary" 
-              @click=${this.handleCancel}
+            <ui-button
+              variant="secondary"
+              size="md"
               ?disabled=${this.isLoading}
+              @ui-click=${this.handleCancel}
             >
               ${this.cancelText || i18nService.t('common.cancel')}
-            </button>
+            </ui-button>
             
-            <button 
-              class="btn ${this.type === 'danger' ? 'btn-danger' : 'btn-primary'}" 
-              @click=${this.handleConfirm}
+            <ui-button
+              variant="${this.type === 'danger' ? 'danger' : 'primary'}"
+              size="md"
+              ?loading=${this.isLoading}
               ?disabled=${this.isLoading}
+              @ui-click=${this.handleConfirm}
             >
-              ${this.isLoading ? html`
-                <span class="loading-spinner"></span>
-              ` : ''}
               ${this.confirmText || i18nService.t('common.confirm')}
-            </button>
+            </ui-button>
           </div>
         </div>
       </div>

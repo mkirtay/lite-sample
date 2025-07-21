@@ -2,6 +2,9 @@ import { LitElement, html, css } from 'lit';
 import { initializeRouter } from './router/router.js';
 import { i18nService } from './i18n/i18n.service.js';
 
+// Import UI components
+import './components/ui/index.js';
+
 /**
  * Main Application Component
  * - Simple state management (without Redux for now)
@@ -52,92 +55,46 @@ class EmployeeApp extends LitElement {
       --font-size-xl: 1.25rem;
       --font-size-2xl: 1.5rem;
       
-      /* Spacing Scale */
+      /* Spacing */
       --spacing-xs: 0.25rem;
       --spacing-sm: 0.5rem;
       --spacing-md: 1rem;
       --spacing-lg: 1.5rem;
       --spacing-xl: 2rem;
-      --spacing-2xl: 3rem;
-      --spacing-3xl: 4rem;
-      --spacing-4xl: 6rem;
       
-      /* Border Radius */
-      --border-radius-sm: 4px;
-      --border-radius-md: 8px;
-      --border-radius-lg: 12px;
-      --border-radius-xl: 16px;
-      
-      /* Box Shadow */
-      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+      /* Shadows */
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
       --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-      --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
       
       /* Transitions */
-      --transition-fast: 150ms ease;
-      --transition-normal: 300ms ease;
-      --transition-slow: 500ms ease;
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.3s ease;
+      --transition-slow: 0.5s ease;
       
-      /* Layout */
-      --container-max-width: 1200px;
-      --header-height: 64px;
-      --sidebar-width: 256px;
-      
-      /* Apply base styles */
       display: block;
+      min-height: 100vh;
       font-family: var(--font-family-primary);
       color: var(--text-primary);
-      background: var(--surface-primary);
-      min-height: 100vh;
+      background: var(--surface-secondary);
     }
 
-    /* Global loading screen */
-    .loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, var(--ing-orange) 0%, var(--ing-blue) 100%);
+    /* Global Layout */
+    .app-container {
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      color: white;
-    }
-
-    .loading-spinner {
-      width: 48px;
-      height: 48px;
-      border: 4px solid rgba(255, 255, 255, 0.2);
-      border-top: 4px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 1rem;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .loading-text {
-      font-size: 1.25rem;
-      font-weight: 500;
     }
 
     /* Header Styles */
     .app-header {
-      background: white;
-      border-bottom: 1px solid var(--border-color);
-      padding: 0 2rem;
-      height: var(--header-height);
+      background: linear-gradient(135deg, var(--ing-orange), #ff8533);
+      color: white;
+      padding: 1rem 2rem;
+      box-shadow: var(--shadow-md);
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      box-shadow: var(--shadow-sm);
+      align-items: center;
       position: sticky;
       top: 0;
       z-index: 100;
@@ -147,126 +104,131 @@ class EmployeeApp extends LitElement {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--ing-dark-blue);
+      color: white;
       text-decoration: none;
+      font-size: var(--font-size-lg);
+      font-weight: 700;
+      transition: var(--transition-fast);
     }
 
-    .logo-svg {
-      height: 32px;
-      width: auto;
-      object-fit: contain;
+    .app-logo:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
     }
 
     .logo-icon {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, var(--ing-orange), var(--ing-blue));
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.5rem;
       border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
+      font-weight: 900;
+      font-size: 1rem;
     }
 
     .header-controls {
       display: flex;
-      align-items: center;
       gap: 1rem;
-    }
-
-    .add-employee-btn {
-      background: var(--ing-orange);
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 6px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
       align-items: center;
-      gap: 0.5rem;
-    }
-
-    .add-employee-btn:hover {
-      background: #e55a2b;
-      transform: translateY(-1px);
-    }
-
-    .employees-icon {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.875rem;
-      font-weight: bold;
     }
 
     .language-switch {
-      background: var(--surface-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--border-radius-md);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
       padding: 0.5rem 1rem;
-      font-size: var(--font-size-sm);
+      border-radius: 6px;
+      font-size: 0.875rem;
       cursor: pointer;
-      transition: all var(--transition-fast);
-      color: var(--text-primary);
+      transition: var(--transition-fast);
+      backdrop-filter: blur(10px);
     }
 
     .language-switch:hover {
-      background: var(--border-color);
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
     }
 
     /* Main Content */
     .app-main {
-      min-height: calc(100vh - var(--header-height));
+      flex: 1;
+      position: relative;
     }
 
-    /* Router Outlet */
-    .router-outlet {
-      width: 100%;
-      display: block;
+    /* Loading Overlay */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
     }
 
-    /* Mobile Responsive */
+    .loading-content {
+      text-align: center;
+      padding: 2rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border-color);
+      border-top: 3px solid var(--ing-orange);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-text {
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+      margin: 0;
+    }
+
+    /* Mobile Responsiveness */
     @media (max-width: 768px) {
       .app-header {
-        padding: 0 1rem;
-      }
-      
-      .app-logo {
-        font-size: 1.25rem;
-      }
-      
-      .logo-icon {
-        width: 28px;
-        height: 28px;
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+        position: relative;
       }
 
       .header-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .app-logo {
+        font-size: var(--font-size-base);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .app-header {
+        padding: 0.75rem;
+      }
+
+      .app-logo {
         gap: 0.5rem;
       }
 
-      .add-employee-btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
-      }
-
-      .add-employee-btn span {
-        display: none;
-      }
-
-      .language-switch {
-        padding: 0.5rem;
-        min-width: 36px;
+      .logo-icon {
+        padding: 0.375rem;
+        font-size: 0.875rem;
       }
     }
   `;
@@ -336,48 +298,50 @@ class EmployeeApp extends LitElement {
   }
 
   navigateToAddEmployee() {
-    window.history.pushState({}, '', '/employees/add');
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    window.location.href = '/employees/add';
   }
 
   render() {
     return html`
-      ${this.isLoading ? html`
-        <div class="loading-screen">
-          <div class="loading-spinner"></div>
-          <div class="loading-text">Loading Employee Management System...</div>
-        </div>
-      ` : ''}
+      <div class="app-container">
+        <header class="app-header">
+          <a href="/employees" class="app-logo">
+            <div class="logo-icon">ING</div>
+            Employee Management
+          </a>
+          <div class="header-controls">
+            <ui-button
+              variant="outline"
+              size="md"
+              @ui-click=${this.navigateToAddEmployee}
+              title="Add New Employee"
+            >
+              <span style="margin-right: 0.5rem;">+</span>
+              Add Employee
+            </ui-button>
+            <button
+              class="language-switch"
+              @click=${this.toggleLanguage}
+              title="Switch Language"
+            >
+              🌐 ${this.language.toUpperCase()}
+            </button>
+          </div>
+        </header>
 
-      <header class="app-header">
-        <a href="/employees" class="app-logo">
-          <div class="logo-icon">ING</div>
-          Employee Management
-        </a>
-        
-        <div class="header-controls">
-          <button 
-            class="add-employee-btn"
-            @click=${this.navigateToAddEmployee}
-            title="Add New Employee"
-          >
-            <span class="employees-icon">+</span>
-            Add Employee
-          </button>
-          
-          <button 
-            class="language-switch"
-            @click=${this.toggleLanguage}
-            title="Switch Language"
-          >
-            🌐 ${this.language.toUpperCase()}
-          </button>
-        </div>
-      </header>
+        <main class="app-main">
+          <div class="router-outlet"></div>
+        </main>
 
-      <main class="app-main">
-        <div class="router-outlet"></div>
-      </main>
+        ${this.isLoading ? html`
+          <div class="loading-overlay">
+            <div class="loading-content">
+              <div class="loading-spinner"></div>
+              <p class="loading-text">Loading...</p>
+            </div>
+          </div>
+        ` : ''}
+      </div>
     `;
   }
 }

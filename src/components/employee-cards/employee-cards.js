@@ -1,6 +1,9 @@
 import { LitElement, html, css } from 'lit';
 import { i18nService } from '../../i18n/i18n.service.js';
 
+// Import UI components
+import '../ui/index.js';
+
 export class EmployeeCards extends LitElement {
   static properties = {
     employees: { type: Array }
@@ -111,39 +114,6 @@ export class EmployeeCards extends LitElement {
       justify-content: flex-end;
     }
 
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .btn-edit {
-      background: var(--info-color);
-      color: white;
-    }
-
-    .btn-edit:hover {
-      background: #2980b9;
-      transform: translateY(-1px);
-    }
-
-    .btn-delete {
-      background: var(--error-color);
-      color: white;
-    }
-
-    .btn-delete:hover {
-      background: #c0392b;
-      transform: translateY(-1px);
-    }
-
     @media (max-width: 768px) {
       .cards-container {
         grid-template-columns: 1fr;
@@ -157,10 +127,6 @@ export class EmployeeCards extends LitElement {
       .card-actions {
         flex-direction: column;
       }
-
-      .btn {
-        justify-content: center;
-      }
     }
   `;
 
@@ -171,21 +137,44 @@ export class EmployeeCards extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    
-    // Subscribe to language changes
     i18nService.subscribe(this);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    
-    // Unsubscribe from language changes
     i18nService.unsubscribe(this);
+  }
+
+  getInitials(firstName, lastName) {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+  }
+
+  formatDate(dateString) {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString(i18nService.getCurrentLanguage() === 'tr' ? 'tr-TR' : 'en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  }
+
+  formatSalary(salary) {
+    if (!salary) return '';
+    return new Intl.NumberFormat(i18nService.getCurrentLanguage() === 'tr' ? 'tr-TR' : 'en-US', {
+      style: 'currency',
+      currency: i18nService.getCurrentLanguage() === 'tr' ? 'TRY' : 'USD'
+    }).format(salary);
   }
 
   handleEdit(employee) {
     this.dispatchEvent(new CustomEvent('edit-employee', {
-      detail: { employeeId: employee.id },
+      detail: employee,
       bubbles: true,
       composed: true
     }));
@@ -193,28 +182,10 @@ export class EmployeeCards extends LitElement {
 
   handleDelete(employee) {
     this.dispatchEvent(new CustomEvent('delete-employee', {
-      detail: { employeeId: employee.id },
+      detail: employee,
       bubbles: true,
       composed: true
     }));
-  }
-
-  getInitials(firstName, lastName) {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-  }
-
-  formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('tr-TR');
-  }
-
-  formatSalary(salary) {
-    if (!salary) return '';
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'TRY'
-    }).format(salary);
   }
 
   render() {
@@ -264,20 +235,22 @@ export class EmployeeCards extends LitElement {
             </div>
 
             <div class="card-actions">
-              <button 
-                class="btn btn-edit"
-                @click=${() => this.handleEdit(employee)}
+              <ui-button
+                variant="secondary"
+                size="md"
+                @ui-click=${() => this.handleEdit(employee)}
                 title="${i18nService.t('common.edit')}"
               >
                 ✏️ ${i18nService.t('common.edit')}
-              </button>
-              <button 
-                class="btn btn-delete"
-                @click=${() => this.handleDelete(employee)}
+              </ui-button>
+              <ui-button
+                variant="danger"
+                size="md"
+                @ui-click=${() => this.handleDelete(employee)}
                 title="${i18nService.t('common.delete')}"
               >
                 🗑️ ${i18nService.t('common.delete')}
-              </button>
+              </ui-button>
             </div>
           </div>
         `)}

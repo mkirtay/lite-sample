@@ -1,7 +1,10 @@
 import { LitElement, html, css } from 'lit';
 import { i18nService } from '../../i18n/i18n.service.js';
 
-// Import child components
+// Import UI components
+import '../ui/index.js';
+
+// Import other components
 import '../employee-table/employee-table.js';
 import '../employee-cards/employee-cards.js';
 import '../search-filter/search-filter.js';
@@ -15,9 +18,9 @@ export class EmployeeListPage extends LitElement {
     paginatedEmployees: { type: Array, state: true },
     searchTerm: { type: String, state: true },
     selectedDepartment: { type: String, state: true },
+    viewMode: { type: String, state: true }, // 'table' or 'cards'
     currentPage: { type: Number, state: true },
-    itemsPerPage: { type: Number },
-    viewMode: { type: String, state: true },
+    itemsPerPage: { type: Number, state: true },
     isLoading: { type: Boolean, state: true },
     showDeleteModal: { type: Boolean, state: true },
     employeeToDelete: { type: Object, state: true }
@@ -443,18 +446,20 @@ export class EmployeeListPage extends LitElement {
             </div>
             
             <div class="view-toggle">
-              <button 
-                class="view-btn ${this.viewMode === 'table' ? 'active' : ''}"
-                @click=${() => this.handleViewToggle('table')}
+              <ui-button
+                variant="${this.viewMode === 'table' ? 'primary' : 'secondary'}"
+                size="sm"
+                @ui-click=${() => this.handleViewToggle('table')}
               >
                 ☰ ${i18nService.t('common.table')}
-              </button>
-              <button 
-                class="view-btn ${this.viewMode === 'cards' ? 'active' : ''}"
-                @click=${() => this.handleViewToggle('cards')}
+              </ui-button>
+              <ui-button
+                variant="${this.viewMode === 'cards' ? 'primary' : 'secondary'}"
+                size="sm"
+                @ui-click=${() => this.handleViewToggle('cards')}
               >
                 ⚏ ${i18nService.t('common.cards')}
-              </button>
+              </ui-button>
             </div>
           </div>
 

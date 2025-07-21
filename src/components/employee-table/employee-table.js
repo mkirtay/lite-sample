@@ -1,6 +1,9 @@
 import { LitElement, html, css } from 'lit';
 import { i18nService } from '../../i18n/i18n.service.js';
 
+// Import UI components
+import '../ui/index.js';
+
 export class EmployeeTable extends LitElement {
   static properties = {
     employees: { type: Array }
@@ -54,67 +57,11 @@ export class EmployeeTable extends LitElement {
       gap: 0.25rem;
     }
 
-    .btn {
-      padding: 0.25rem 0.5rem;
-      border: none;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-edit {
-      background: #3498db;
-      color: white;
-    }
-
-    .btn-edit:hover {
-      background: #2980b9;
-    }
-
-    .btn-delete {
-      background: #e74c3c;
-      color: white;
-    }
-
-    .btn-delete:hover {
-      background: #c0392b;
-    }
-
     .position-badge {
       border-radius: 12px;
       font-size: 0.75rem;
       font-weight: 500;
     }
-
-    // .department-engineering {
-    //   background: #20c997;
-    // }
-
-    // .department-marketing {
-    //   background: #e83e8c;
-    // }
-
-    // .department-sales {
-    //   background: #28a745;
-    // }
-
-    // .department-analytics {
-    //   background: #6f42c1;
-    // }
-
-    // /* Position badges - daha açık gri */
-    // .position-junior {
-    //   background: #6c757d;
-    // }
-
-    // .position-senior {
-    //   background: #495057;
-    // }
-
-    // .position-manager {
-    //   background: #343a40;
-    // }
 
     .checkbox {
       cursor: pointer;
@@ -140,21 +87,32 @@ export class EmployeeTable extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    
-    // Subscribe to language changes
     i18nService.subscribe(this);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    
-    // Unsubscribe from language changes
     i18nService.unsubscribe(this);
+  }
+
+  formatDate(dateString) {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString(i18nService.getCurrentLanguage() === 'tr' ? 'tr-TR' : 'en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+    } catch (error) {
+      return dateString;
+    }
   }
 
   handleEdit(employee) {
     this.dispatchEvent(new CustomEvent('edit-employee', {
-      detail: { employeeId: employee.id },
+      detail: employee,
       bubbles: true,
       composed: true
     }));
@@ -162,24 +120,10 @@ export class EmployeeTable extends LitElement {
 
   handleDelete(employee) {
     this.dispatchEvent(new CustomEvent('delete-employee', {
-      detail: { employeeId: employee.id },
+      detail: employee,
       bubbles: true,
       composed: true
     }));
-  }
-
-  formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('tr-TR');
-  }
-
-  formatSalary(salary) {
-    if (!salary) return '';
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'TRY'
-    }).format(salary);
   }
 
   render() {
@@ -224,20 +168,22 @@ export class EmployeeTable extends LitElement {
                 </td>
                 <td>
                   <div class="actions">
-                    <button 
-                      class="btn btn-edit"
-                      @click=${() => this.handleEdit(employee)}
+                    <ui-button
+                      variant="secondary"
+                      size="sm"
+                      @ui-click=${() => this.handleEdit(employee)}
                       title="${i18nService.t('common.edit')}"
                     >
                       ✏️
-                    </button>
-                    <button 
-                      class="btn btn-delete"
-                      @click=${() => this.handleDelete(employee)}
+                    </ui-button>
+                    <ui-button
+                      variant="danger"
+                      size="sm"
+                      @ui-click=${() => this.handleDelete(employee)}
                       title="${i18nService.t('common.delete')}"
                     >
                       🗑️
-                    </button>
+                    </ui-button>
                   </div>
                 </td>
               </tr>

@@ -1,6 +1,9 @@
 import { LitElement, html, css } from 'lit';
 import { i18nService } from '../../i18n/i18n.service.js';
 
+// Import UI components
+import '../ui/index.js';
+
 export class SearchFilter extends LitElement {
   static properties = {
     searchTerm: { type: String, state: true },
@@ -15,7 +18,7 @@ export class SearchFilter extends LitElement {
     .filter-container {
       display: flex;
       gap: 1rem;
-      align-items: center;
+      align-items: flex-end;
       flex-wrap: wrap;
     }
 
@@ -26,29 +29,6 @@ export class SearchFilter extends LitElement {
 
     .filter-group {
       min-width: 150px;
-    }
-
-    .search-input,
-    .filter-select {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #e1e5e9;
-      border-radius: 4px;
-      font-size: 0.875rem;
-      transition: all 0.2s ease;
-      background: white;
-      color: #495057;
-    }
-
-    .search-input:focus,
-    .filter-select:focus {
-      outline: none;
-      border-color: #ff6200;
-      box-shadow: 0 0 0 2px rgba(255, 98, 0, 0.1);
-    }
-
-    .search-input::placeholder {
-      color: #6c757d;
     }
 
     @media (max-width: 768px) {
@@ -72,63 +52,64 @@ export class SearchFilter extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    
-    // Subscribe to language changes
     i18nService.subscribe(this);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    
-    // Unsubscribe from language changes
     i18nService.unsubscribe(this);
   }
 
-  handleSearchChange(e) {
-    this.searchTerm = e.target.value;
+  handleSearchChange(event) {
+    this.searchTerm = event.detail.value;
     this.dispatchEvent(new CustomEvent('search-changed', {
-      detail: { searchTerm: this.searchTerm },
+      detail: this.searchTerm,
       bubbles: true,
       composed: true
     }));
   }
 
-  handleFilterChange(e) {
-    this.selectedDepartment = e.target.value;
+  handleFilterChange(event) {
+    this.selectedDepartment = event.detail.value;
     this.dispatchEvent(new CustomEvent('filter-changed', {
-      detail: { department: this.selectedDepartment },
+      detail: this.selectedDepartment,
       bubbles: true,
       composed: true
     }));
+  }
+
+  getDepartmentOptions() {
+    return [
+      { value: '', label: i18nService.t('common.allDepartments') },
+      { value: 'Analytics', label: 'Analytics' },
+      { value: 'Engineering', label: i18nService.t('departments.engineering') },
+      { value: 'Marketing', label: i18nService.t('departments.marketing') },
+      { value: 'Sales', label: i18nService.t('departments.sales') },
+      { value: 'HR', label: i18nService.t('departments.hr') },
+      { value: 'Finance', label: i18nService.t('departments.finance') }
+    ];
   }
 
   render() {
     return html`
       <div class="filter-container">
         <div class="search-group">
-          <input
+          <ui-input
+            name="search"
             type="text"
-            class="search-input"
             .value=${this.searchTerm}
-            @input=${this.handleSearchChange}
             placeholder="${i18nService.t('common.search')}"
-          />
+            @ui-input=${this.handleSearchChange}
+          ></ui-input>
         </div>
 
         <div class="filter-group">
-          <select
-            class="filter-select"
+          <ui-select
+            name="department"
             .value=${this.selectedDepartment}
-            @change=${this.handleFilterChange}
-          >
-            <option value="">${i18nService.t('common.allDepartments')}</option>
-            <option value="Analytics">Analytics</option>
-            <option value="Engineering">${i18nService.t('departments.engineering')}</option>
-            <option value="Marketing">${i18nService.t('departments.marketing')}</option>
-            <option value="Sales">${i18nService.t('departments.sales')}</option>
-            <option value="HR">${i18nService.t('departments.hr')}</option>
-            <option value="Finance">${i18nService.t('departments.finance')}</option>
-          </select>
+            .options=${this.getDepartmentOptions()}
+            @ui-change=${this.handleFilterChange}
+          ></ui-select>
         </div>
       </div>
     `;

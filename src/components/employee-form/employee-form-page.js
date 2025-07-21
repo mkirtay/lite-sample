@@ -1,7 +1,8 @@
 import { LitElement, html, css } from 'lit';
 import { i18nService } from '../../i18n/i18n.service.js';
 
-// Import modal component
+// Import UI components
+import '../ui/index.js';
 import '../modal/modal.js';
 
 export class EmployeeFormPage extends LitElement {
@@ -65,51 +66,6 @@ export class EmployeeFormPage extends LitElement {
       }
     }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .form-label {
-      font-weight: 500;
-      color: #495057;
-      margin-bottom: 0.5rem;
-      font-size: 0.875rem;
-    }
-
-    .required::after {
-      content: ' *';
-      color: #dc3545;
-    }
-
-    .form-input,
-    .form-select {
-      padding: 0.75rem;
-      border: 1px solid #ced4da;
-      border-radius: 4px;
-      font-size: 0.875rem;
-      transition: border-color 0.15s ease;
-      background: white;
-    }
-
-    .form-input:focus,
-    .form-select:focus {
-      outline: none;
-      border-color: #ff6200;
-      box-shadow: 0 0 0 2px rgba(255, 98, 0, 0.1);
-    }
-
-    .form-input.error,
-    .form-select.error {
-      border-color: #dc3545;
-    }
-
-    .error-message {
-      color: #dc3545;
-      font-size: 0.75rem;
-      margin-top: 0.25rem;
-    }
-
     .form-actions {
       display: flex;
       gap: 0.75rem;
@@ -117,61 +73,6 @@ export class EmployeeFormPage extends LitElement {
       margin-top: 2rem;
       padding-top: 1.5rem;
       border-top: 1px solid #e9ecef;
-    }
-
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 4px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      min-width: 100px;
-    }
-
-    .btn-primary {
-      background: #ff6200;
-      color: white;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background: #e55a00;
-    }
-
-    .btn-secondary {
-      background: #f8f9fa;
-      color: #495057;
-      border: 1px solid #ced4da;
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-      background: #e9ecef;
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .loading-spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid transparent;
-      border-top: 2px solid currentColor;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
     }
 
     @media (max-width: 768px) {
@@ -186,16 +87,15 @@ export class EmployeeFormPage extends LitElement {
       .form-actions {
         flex-direction: column;
       }
-
-      .btn {
-        width: 100%;
-        justify-content: center;
-      }
     }
   `;
 
   constructor() {
     super();
+    this.employeeId = '';
+    this.isEditMode = false;
+    this.isLoading = false;
+    this.showConfirmModal = false;
     this.employee = {
       firstName: '',
       lastName: '',
@@ -206,38 +106,27 @@ export class EmployeeFormPage extends LitElement {
       hireDate: '',
       salary: ''
     };
-    this.employees = JSON.parse(localStorage.getItem('employees')) || [];
+    this.employees = JSON.parse(localStorage.getItem('employees') || '[]');
     this.errors = {};
-    this.isLoading = false;
-    this.isEditMode = false;
-    this.showConfirmModal = false;
   }
 
   connectedCallback() {
     super.connectedCallback();
-    this.extractEmployeeId();
+    i18nService.subscribe(this);
+    
+    // Extract employeeId from URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    this.employeeId = urlParams.get('id');
+    
     if (this.employeeId) {
+      this.isEditMode = true;
       this.loadEmployee();
     }
-    
-    // Subscribe to language changes
-    i18nService.subscribe(this);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    
-    // Unsubscribe from language changes
     i18nService.unsubscribe(this);
-  }
-
-  extractEmployeeId() {
-    const path = window.location.pathname;
-    const match = path.match(/\/employees\/edit\/(.+)/);
-    if (match) {
-      this.employeeId = match[1];
-      this.isEditMode = true;
-    }
   }
 
   loadEmployee() {
@@ -245,135 +134,113 @@ export class EmployeeFormPage extends LitElement {
     if (employee) {
       this.employee = { ...employee };
     } else {
-      // Employee not found, redirect to list
-      window.history.pushState({}, '', '/employees');
-      window.dispatchEvent(new PopStateEvent('popstate'));
+      // Redirect if employee not found
+      window.location.href = '/employees';
     }
   }
 
-  validateField(name, value) {
-    const errors = { ...this.errors };
-    delete errors[name];
-
-    switch (name) {
-      case 'firstName':
-      case 'lastName':
-        if (!value.trim()) {
-          errors[name] = i18nService.t('validation.required');
-        } else if (value.trim().length < 2) {
-          errors[name] = i18nService.t('validation.minLength', { min: 2 });
-        }
-        break;
-      
-      case 'email':
-        if (!value.trim()) {
-          errors[name] = i18nService.t('validation.required');
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          errors[name] = i18nService.t('validation.invalidEmail');
-        } else if (this.isEmailDuplicate(value)) {
-          errors[name] = i18nService.t('validation.emailExists');
-        }
-        break;
-      
-      case 'phone':
-        if (!value.trim()) {
-          errors[name] = i18nService.t('validation.required');
-        } else if (!/^[\+]?[0-9\s\-\(\)]{10,}$/.test(value)) {
-          errors[name] = i18nService.t('validation.invalidPhone');
-        }
-        break;
-      
-      case 'department':
-      case 'position':
-        if (!value.trim()) {
-          errors[name] = i18nService.t('validation.required');
-        }
-        break;
-      
-      case 'hireDate':
-        if (!value) {
-          errors[name] = i18nService.t('validation.required');
-        } else if (new Date(value) > new Date()) {
-          errors[name] = i18nService.t('validation.futureDate');
-        }
-        break;
-      
-      case 'salary':
-        if (!value || isNaN(value) || Number(value) <= 0) {
-          errors[name] = i18nService.t('validation.invalidSalary');
-        }
-        break;
+  handleInputChange(event) {
+    const { name, value } = event.detail;
+    this.employee = {
+      ...this.employee,
+      [name]: value
+    };
+    
+    // Clear error when user starts typing
+    if (this.errors[name]) {
+      this.errors = {
+        ...this.errors,
+        [name]: ''
+      };
     }
-
-    this.errors = errors;
-    return !errors[name];
-  }
-
-  isEmailDuplicate(email) {
-    return this.employees.some(emp => 
-      emp.email.toLowerCase() === email.toLowerCase() && 
-      emp.id !== this.employeeId
-    );
   }
 
   validateForm() {
-    const fields = ['firstName', 'lastName', 'email', 'phone', 'department', 'position', 'hireDate', 'salary'];
-    let isValid = true;
+    const errors = {};
 
-    fields.forEach(field => {
-      if (!this.validateField(field, this.employee[field])) {
-        isValid = false;
-      }
-    });
+    if (!this.employee.firstName?.trim()) {
+      errors.firstName = i18nService.t('validation.required');
+    } else if (this.employee.firstName.trim().length < 2) {
+      errors.firstName = i18nService.t('validation.minLength', { min: 2 });
+    }
 
-    return isValid;
-  }
+    if (!this.employee.lastName?.trim()) {
+      errors.lastName = i18nService.t('validation.required');
+    } else if (this.employee.lastName.trim().length < 2) {
+      errors.lastName = i18nService.t('validation.minLength', { min: 2 });
+    }
 
-  handleInputChange(e) {
-    const { name, value } = e.target;
-    this.employee = { ...this.employee, [name]: value };
-    
-    // Real-time validation
-    this.validateField(name, value);
+    if (!this.employee.email?.trim()) {
+      errors.email = i18nService.t('validation.required');
+    } else if (!/\S+@\S+\.\S+/.test(this.employee.email)) {
+      errors.email = i18nService.t('validation.invalidEmail');
+    }
+
+    if (!this.employee.phone?.trim()) {
+      errors.phone = i18nService.t('validation.required');
+    }
+
+    if (!this.employee.department?.trim()) {
+      errors.department = i18nService.t('validation.required');
+    }
+
+    if (!this.employee.position?.trim()) {
+      errors.position = i18nService.t('validation.required');
+    }
+
+    if (!this.employee.hireDate?.trim()) {
+      errors.hireDate = i18nService.t('validation.required');
+    }
+
+    if (!this.employee.salary || this.employee.salary <= 0) {
+      errors.salary = i18nService.t('validation.required');
+    }
+
+    this.errors = errors;
+    return Object.keys(errors).length === 0;
   }
 
   handleSubmit(e) {
     e.preventDefault();
-    
+
     if (!this.validateForm()) {
       return;
     }
-
-    // Show confirmation modal instead of directly saving
-    this.showConfirmModal = true;
+    this.showConfirmModal = true; // Show confirmation modal
   }
 
   handleConfirmSave() {
     this.showConfirmModal = false;
     this.isLoading = true;
 
-    // Simulate API call
+    // Simulate API call delay
     setTimeout(() => {
-      try {
-        if (this.isEditMode) {
-          this.updateEmployee();
-        } else {
-          this.createEmployee();
+      if (this.isEditMode) {
+        // Update existing employee
+        const index = this.employees.findIndex(emp => emp.id === this.employeeId);
+        if (index !== -1) {
+          this.employees[index] = { ...this.employee, id: this.employeeId };
         }
-        
-        this.isLoading = false;
-        
-        // Redirect to employees list
-        window.history.pushState({}, '', '/employees');
-        window.dispatchEvent(new PopStateEvent('popstate'));
-        
-        // Dispatch event for list refresh
-        window.dispatchEvent(new CustomEvent('employee-updated'));
-        
-      } catch (error) {
-        this.isLoading = false;
-        console.error('Error saving employee:', error);
+      } else {
+        // Add new employee
+        const newEmployee = {
+          ...this.employee,
+          id: Date.now().toString(),
+          salary: Number(this.employee.salary)
+        };
+        this.employees.push(newEmployee);
       }
+
+      // Save to localStorage
+      localStorage.setItem('employees', JSON.stringify(this.employees));
+
+      // Dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent('employee-updated'));
+
+      this.isLoading = false;
+
+      // Redirect to employee list
+      window.location.href = '/employees';
     }, 1000);
   }
 
@@ -381,32 +248,20 @@ export class EmployeeFormPage extends LitElement {
     this.showConfirmModal = false;
   }
 
-  createEmployee() {
-    const newEmployee = {
-      ...this.employee,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString()
-    };
-    
-    this.employees.push(newEmployee);
-    localStorage.setItem('employees', JSON.stringify(this.employees));
-  }
-
-  updateEmployee() {
-    const index = this.employees.findIndex(emp => emp.id === this.employeeId);
-    if (index !== -1) {
-      this.employees[index] = {
-        ...this.employees[index],
-        ...this.employee,
-        updatedAt: new Date().toISOString()
-      };
-      localStorage.setItem('employees', JSON.stringify(this.employees));
-    }
-  }
-
   handleCancel() {
-    window.history.pushState({}, '', '/employees');
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    window.location.href = '/employees';
+  }
+
+  getDepartmentOptions() {
+    return [
+      { value: '', label: i18nService.t('employee.selectDepartment'), disabled: true },
+      { value: 'Engineering', label: i18nService.t('departments.engineering') },
+      { value: 'Marketing', label: i18nService.t('departments.marketing') },
+      { value: 'Sales', label: i18nService.t('departments.sales') },
+      { value: 'HR', label: i18nService.t('departments.hr') },
+      { value: 'Finance', label: i18nService.t('departments.finance') },
+      { value: 'Analytics', label: 'Analytics' }
+    ];
   }
 
   render() {
@@ -423,178 +278,114 @@ export class EmployeeFormPage extends LitElement {
 
         <form @submit=${this.handleSubmit} class="employee-form">
           <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label required" for="firstName">
-                ${i18nService.t('employee.firstName')}
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                .value=${this.employee.firstName}
-                @input=${this.handleInputChange}
-                class="form-input ${this.errors.firstName ? 'error' : ''}"
-                autocomplete="given-name"
-              />
-              ${this.errors.firstName ? html`
-                <div class="error-message">${this.errors.firstName}</div>
-              ` : ''}
-            </div>
+            <ui-input
+              name="firstName"
+              type="text"
+              .value=${this.employee.firstName}
+              label="${i18nService.t('employee.firstName')}"
+              .error=${this.errors.firstName}
+              required
+              autocomplete="given-name"
+              @ui-input=${this.handleInputChange}
+            ></ui-input>
 
-            <div class="form-group">
-              <label class="form-label required" for="lastName">
-                ${i18nService.t('employee.lastName')}
-              </label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                .value=${this.employee.lastName}
-                @input=${this.handleInputChange}
-                class="form-input ${this.errors.lastName ? 'error' : ''}"
-                autocomplete="family-name"
-              />
-              ${this.errors.lastName ? html`
-                <div class="error-message">${this.errors.lastName}</div>
-              ` : ''}
-            </div>
+            <ui-input
+              name="lastName"
+              type="text"
+              .value=${this.employee.lastName}
+              label="${i18nService.t('employee.lastName')}"
+              .error=${this.errors.lastName}
+              required
+              autocomplete="family-name"
+              @ui-input=${this.handleInputChange}
+            ></ui-input>
 
-            <div class="form-group">
-              <label class="form-label required" for="email">
-                ${i18nService.t('employee.email')}
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                .value=${this.employee.email}
-                @input=${this.handleInputChange}
-                class="form-input ${this.errors.email ? 'error' : ''}"
-                autocomplete="email"
-              />
-              ${this.errors.email ? html`
-                <div class="error-message">${this.errors.email}</div>
-              ` : ''}
-            </div>
+            <ui-input
+              name="email"
+              type="email"
+              .value=${this.employee.email}
+              label="${i18nService.t('employee.email')}"
+              .error=${this.errors.email}
+              required
+              autocomplete="email"
+              @ui-input=${this.handleInputChange}
+            ></ui-input>
 
-            <div class="form-group">
-              <label class="form-label required" for="phone">
-                ${i18nService.t('employee.phone')}
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                .value=${this.employee.phone}
-                @input=${this.handleInputChange}
-                class="form-input ${this.errors.phone ? 'error' : ''}"
-                autocomplete="tel"
-              />
-              ${this.errors.phone ? html`
-                <div class="error-message">${this.errors.phone}</div>
-              ` : ''}
-            </div>
+            <ui-input
+              name="phone"
+              type="tel"
+              .value=${this.employee.phone}
+              label="${i18nService.t('employee.phone')}"
+              .error=${this.errors.phone}
+              required
+              autocomplete="tel"
+              @ui-input=${this.handleInputChange}
+            ></ui-input>
 
-            <div class="form-group">
-              <label class="form-label required" for="department">
-                ${i18nService.t('employee.department')}
-              </label>
-              <select
-                id="department"
-                name="department"
-                .value=${this.employee.department}
-                @change=${this.handleInputChange}
-                class="form-select ${this.errors.department ? 'error' : ''}"
-              >
-                <option value="">${i18nService.t('employee.selectDepartment')}</option>
-                <option value="Engineering">${i18nService.t('departments.engineering')}</option>
-                <option value="Marketing">${i18nService.t('departments.marketing')}</option>
-                <option value="Sales">${i18nService.t('departments.sales')}</option>
-                <option value="HR">${i18nService.t('departments.hr')}</option>
-                <option value="Finance">${i18nService.t('departments.finance')}</option>
-                <option value="Analytics">Analytics</option>
-              </select>
-              ${this.errors.department ? html`
-                <div class="error-message">${this.errors.department}</div>
-              ` : ''}
-            </div>
+            <ui-select
+              name="department"
+              .value=${this.employee.department}
+              label="${i18nService.t('employee.department')}"
+              .error=${this.errors.department}
+              .options=${this.getDepartmentOptions()}
+              placeholder="${i18nService.t('employee.selectDepartment')}"
+              required
+              @ui-change=${this.handleInputChange}
+            ></ui-select>
 
-            <div class="form-group">
-              <label class="form-label required" for="position">
-                ${i18nService.t('employee.position')}
-              </label>
-              <input
-                type="text"
-                id="position"
-                name="position"
-                .value=${this.employee.position}
-                @input=${this.handleInputChange}
-                class="form-input ${this.errors.position ? 'error' : ''}"
-                autocomplete="organization-title"
-              />
-              ${this.errors.position ? html`
-                <div class="error-message">${this.errors.position}</div>
-              ` : ''}
-            </div>
+            <ui-input
+              name="position"
+              type="text"
+              .value=${this.employee.position}
+              label="${i18nService.t('employee.position')}"
+              .error=${this.errors.position}
+              required
+              autocomplete="organization-title"
+              @ui-input=${this.handleInputChange}
+            ></ui-input>
 
-            <div class="form-group">
-              <label class="form-label required" for="hireDate">
-                ${i18nService.t('employee.hireDate')}
-              </label>
-              <input
-                type="date"
-                id="hireDate"
-                name="hireDate"
-                .value=${this.employee.hireDate}
-                @input=${this.handleInputChange}
-                class="form-input ${this.errors.hireDate ? 'error' : ''}"
-                max=${new Date().toISOString().split('T')[0]}
-              />
-              ${this.errors.hireDate ? html`
-                <div class="error-message">${this.errors.hireDate}</div>
-              ` : ''}
-            </div>
+            <ui-input
+              name="hireDate"
+              type="date"
+              .value=${this.employee.hireDate}
+              label="${i18nService.t('employee.hireDate')}"
+              .error=${this.errors.hireDate}
+              max=${new Date().toISOString().split('T')[0]}
+              required
+              @ui-input=${this.handleInputChange}
+            ></ui-input>
 
-            <div class="form-group">
-              <label class="form-label required" for="salary">
-                ${i18nService.t('employee.salary')}
-              </label>
-              <input
-                type="number"
-                id="salary"
-                name="salary"
-                .value=${this.employee.salary}
-                @input=${this.handleInputChange}
-                class="form-input ${this.errors.salary ? 'error' : ''}"
-                min="0"
-                step="1000"
-              />
-              ${this.errors.salary ? html`
-                <div class="error-message">${this.errors.salary}</div>
-              ` : ''}
-            </div>
+            <ui-input
+              name="salary"
+              type="number"
+              .value=${this.employee.salary}
+              label="${i18nService.t('employee.salary')}"
+              .error=${this.errors.salary}
+              min="0"
+              step="1000"
+              required
+              @ui-input=${this.handleInputChange}
+            ></ui-input>
           </div>
 
           <div class="form-actions">
-            <button 
-              type="button" 
-              class="btn btn-secondary"
-              @click=${this.handleCancel}
+            <ui-button
+              variant="secondary"
+              type="button"
               ?disabled=${this.isLoading}
+              @ui-click=${this.handleCancel}
             >
               ${i18nService.t('common.cancel')}
-            </button>
+            </ui-button>
             
-            <button 
-              type="submit" 
-              class="btn btn-primary"
+            <ui-button
+              variant="primary"
+              type="submit"
+              ?loading=${this.isLoading}
               ?disabled=${this.isLoading}
             >
-              ${this.isLoading ? html`
-                <span class="loading-spinner"></span>
-              ` : ''}
               ${this.isEditMode ? i18nService.t('common.update') : i18nService.t('common.save')}
-            </button>
+            </ui-button>
           </div>
         </form>
       </div>
