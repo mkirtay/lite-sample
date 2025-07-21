@@ -199,12 +199,12 @@ export class EmployeeFormPage extends LitElement {
     this.employee = {
       firstName: '',
       lastName: '',
-      email: '',
+      dateOfEmployment: '',
+      dateOfBirth: '1990-01-15',
       phone: '',
+      email: '',
       department: '',
-      position: '',
-      hireDate: '',
-      salary: ''
+      position: ''
     };
     this.employees = JSON.parse(localStorage.getItem('employees')) || [];
     this.errors = {};
@@ -290,17 +290,12 @@ export class EmployeeFormPage extends LitElement {
         }
         break;
       
-      case 'hireDate':
+      case 'dateOfEmployment':
+      case 'dateOfBirth':
         if (!value) {
           errors[name] = i18nService.t('validation.required');
         } else if (new Date(value) > new Date()) {
           errors[name] = i18nService.t('validation.futureDate');
-        }
-        break;
-      
-      case 'salary':
-        if (!value || isNaN(value) || Number(value) <= 0) {
-          errors[name] = i18nService.t('validation.invalidSalary');
         }
         break;
     }
@@ -317,7 +312,7 @@ export class EmployeeFormPage extends LitElement {
   }
 
   validateForm() {
-    const fields = ['firstName', 'lastName', 'email', 'phone', 'department', 'position', 'hireDate', 'salary'];
+    const fields = ['firstName', 'lastName', 'email', 'phone', 'department', 'position', 'dateOfEmployment', 'dateOfBirth'];
     let isValid = true;
 
     fields.forEach(field => {
@@ -388,7 +383,7 @@ export class EmployeeFormPage extends LitElement {
       createdAt: new Date().toISOString()
     };
     
-    this.employees.push(newEmployee);
+    this.employees.unshift(newEmployee); // En başa ekle (push yerine unshift)
     localStorage.setItem('employees', JSON.stringify(this.employees));
   }
 
@@ -507,12 +502,8 @@ export class EmployeeFormPage extends LitElement {
                 class="form-select ${this.errors.department ? 'error' : ''}"
               >
                 <option value="">${i18nService.t('employee.selectDepartment')}</option>
-                <option value="Engineering">${i18nService.t('departments.engineering')}</option>
-                <option value="Marketing">${i18nService.t('departments.marketing')}</option>
-                <option value="Sales">${i18nService.t('departments.sales')}</option>
-                <option value="HR">${i18nService.t('departments.hr')}</option>
-                <option value="Finance">${i18nService.t('departments.finance')}</option>
                 <option value="Analytics">Analytics</option>
+                <option value="Tech">Tech</option>
               </select>
               ${this.errors.department ? html`
                 <div class="error-message">${this.errors.department}</div>
@@ -523,54 +514,56 @@ export class EmployeeFormPage extends LitElement {
               <label class="form-label required" for="position">
                 ${i18nService.t('employee.position')}
               </label>
-              <input
-                type="text"
+              <select
                 id="position"
                 name="position"
                 .value=${this.employee.position}
-                @input=${this.handleInputChange}
-                class="form-input ${this.errors.position ? 'error' : ''}"
-                autocomplete="organization-title"
-              />
+                @change=${this.handleInputChange}
+                class="form-select ${this.errors.position ? 'error' : ''}"
+              >
+                <option value="">${i18nService.t('employee.selectPosition')}</option>
+                <option value="Junior">${i18nService.t('positions.junior')}</option>
+                <option value="Mid">${i18nService.t('positions.mid')}</option>
+                <option value="Senior">${i18nService.t('positions.senior')}</option>
+              </select>
               ${this.errors.position ? html`
                 <div class="error-message">${this.errors.position}</div>
               ` : ''}
             </div>
 
             <div class="form-group">
-              <label class="form-label required" for="hireDate">
-                ${i18nService.t('employee.hireDate')}
+              <label class="form-label required" for="dateOfEmployment">
+                ${i18nService.t('employee.dateOfEmployment')}
               </label>
               <input
                 type="date"
-                id="hireDate"
-                name="hireDate"
-                .value=${this.employee.hireDate}
+                id="dateOfEmployment"
+                name="dateOfEmployment"
+                .value=${this.employee.dateOfEmployment}
                 @input=${this.handleInputChange}
-                class="form-input ${this.errors.hireDate ? 'error' : ''}"
+                class="form-input ${this.errors.dateOfEmployment ? 'error' : ''}"
                 max=${new Date().toISOString().split('T')[0]}
               />
-              ${this.errors.hireDate ? html`
-                <div class="error-message">${this.errors.hireDate}</div>
+              ${this.errors.dateOfEmployment ? html`
+                <div class="error-message">${this.errors.dateOfEmployment}</div>
               ` : ''}
             </div>
 
             <div class="form-group">
-              <label class="form-label required" for="salary">
-                ${i18nService.t('employee.salary')}
+              <label class="form-label required" for="dateOfBirth">
+                ${i18nService.t('employee.dateOfBirth')}
               </label>
               <input
-                type="number"
-                id="salary"
-                name="salary"
-                .value=${this.employee.salary}
+                type="date"
+                id="dateOfBirth"
+                name="dateOfBirth"
+                .value=${this.employee.dateOfBirth}
                 @input=${this.handleInputChange}
-                class="form-input ${this.errors.salary ? 'error' : ''}"
-                min="0"
-                step="1000"
+                class="form-input ${this.errors.dateOfBirth ? 'error' : ''}"
+                max=${new Date().toISOString().split('T')[0]}
               />
-              ${this.errors.salary ? html`
-                <div class="error-message">${this.errors.salary}</div>
+              ${this.errors.dateOfBirth ? html`
+                <div class="error-message">${this.errors.dateOfBirth}</div>
               ` : ''}
             </div>
           </div>

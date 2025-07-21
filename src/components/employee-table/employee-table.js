@@ -193,7 +193,7 @@ export class EmployeeTable extends LitElement {
               </th>
               <th>${i18nService.t('employee.firstName')}</th>
               <th>${i18nService.t('employee.lastName')}</th>
-              <th>${i18nService.t('employee.hireDate')}</th>
+              <th>${i18nService.t('employee.dateOfEmployment')}</th>
               <th>${i18nService.t('employee.dateOfBirth')}</th>
               <th>${i18nService.t('employee.phone')}</th>
               <th>${i18nService.t('employee.email')}</th>
@@ -210,8 +210,8 @@ export class EmployeeTable extends LitElement {
                 </td>
                 <td>${employee.firstName}</td>
                 <td>${employee.lastName}</td>
-                <td>${this.formatDate(employee.hireDate)}</td>
-                <td>${this.formatDate(employee.hireDate)}</td>
+                <td>${this.formatDate(employee.dateOfEmployment)}</td>
+                <td>${this.formatDate(employee.dateOfBirth)}</td>
                 <td>${employee.phone}</td>
                 <td>${employee.email}</td>
                 <td>

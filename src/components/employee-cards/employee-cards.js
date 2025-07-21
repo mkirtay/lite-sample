@@ -254,12 +254,12 @@ export class EmployeeCards extends LitElement {
               
               <div class="info-row">
                 <span class="info-icon">📅</span>
-                <span class="info-text">${this.formatDate(employee.hireDate)}</span>
+                <span class="info-text">${i18nService.t('employee.employed')}: ${this.formatDate(employee.dateOfEmployment)}</span>
               </div>
               
               <div class="info-row">
-                <span class="info-icon">💰</span>
-                <span class="info-text">${this.formatSalary(employee.salary)}</span>
+                <span class="info-icon">🎂</span>
+                <span class="info-text">${i18nService.t('employee.born')}: ${this.formatDate(employee.dateOfBirth)}</span>
               </div>
             </div>
 

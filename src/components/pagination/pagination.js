@@ -10,7 +10,7 @@ export class PaginationComponent extends LitElement {
   static styles = css`
     :host {
       display: block;
-      margin-top: 2rem;
+      padding: 1rem 0;
     }
 
     .pagination-container {
@@ -18,60 +18,113 @@ export class PaginationComponent extends LitElement {
       justify-content: center;
       align-items: center;
       gap: 0.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
     }
 
     .pagination-btn {
-      padding: 0.75rem 1rem;
-      border: 2px solid var(--border-color);
+      padding: 0.75rem;
+      border: 1px solid #e1e5e9;
       background: white;
-      color: var(--text-primary);
+      color: #495057;
       border-radius: 8px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
       font-size: 0.875rem;
       font-weight: 500;
       min-width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .pagination-btn:hover:not(:disabled) {
-      border-color: var(--ing-orange);
-      background: var(--ing-orange);
+    .pagination-btn:hover:not(:disabled):not(.ellipsis) {
+      border-color: #ff6200;
+      background: #ff6200;
       color: white;
-      transform: translateY(-1px);
     }
 
     .pagination-btn:disabled {
-      opacity: 0.5;
+      opacity: 0.3;
       cursor: not-allowed;
-      transform: none;
+      color: #6c757d;
     }
 
     .pagination-btn.active {
-      background: var(--ing-orange);
-      border-color: var(--ing-orange);
+      background: #ff6200;
+      border-color: #ff6200;
       color: white;
+      font-weight: 600;
     }
 
     .pagination-btn.ellipsis {
       border: none;
-      background: none;
+      background: transparent;
       cursor: default;
+      color: #6c757d;
     }
 
     .pagination-btn.ellipsis:hover {
-      background: none;
+      background: transparent;
       border: none;
-      transform: none;
+    }
+
+    .pagination-btn.nav-btn {
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+    }
+
+    .pagination-btn.nav-btn:hover:not(:disabled) {
+      background: #f8f9fa;
+      border-color: #ff6200;
+      color: #ff6200;
+    }
+
+    .pagination-btn.nav-btn:disabled {
+      background: #f8f9fa;
+      color: #adb5bd;
+      border-color: #e9ecef;
+    }
+
+    /* Number buttons styling */
+    .pagination-btn:not(.nav-btn):not(.ellipsis) {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+    }
+
+    .pagination-btn:not(.nav-btn):not(.ellipsis).active {
+      background: #ff6200;
+      border-color: #ff6200;
+      color: white;
     }
 
     @media (max-width: 768px) {
+      .pagination-container {
+        gap: 0.25rem;
+        padding: 0 1rem;
+      }
+
       .pagination-btn {
-        padding: 0.5rem 0.75rem;
+        padding: 0.5rem;
         font-size: 0.8rem;
         min-width: 36px;
+        height: 36px;
+      }
+
+      .pagination-btn:not(.nav-btn):not(.ellipsis) {
+        width: 36px;
+        height: 36px;
+      }
+
+      .pagination-btn.nav-btn {
+        padding: 0.5rem 0.75rem;
       }
     }
   `;
@@ -148,12 +201,12 @@ export class PaginationComponent extends LitElement {
     return html`
       <div class="pagination-container">
         <button
-          class="pagination-btn"
+          class="pagination-btn nav-btn"
           @click=${() => this.handlePageChange(this.currentPage - 1)}
           ?disabled=${this.currentPage === 1}
           title="${i18nService.t('pagination.previous')}"
         >
-          ← ${i18nService.t('pagination.previous')}
+          ←
         </button>
 
         ${visiblePages.map(page => 
@@ -171,12 +224,12 @@ export class PaginationComponent extends LitElement {
         )}
 
         <button
-          class="pagination-btn"
+          class="pagination-btn nav-btn"
           @click=${() => this.handlePageChange(this.currentPage + 1)}
           ?disabled=${this.currentPage === this.totalPages}
           title="${i18nService.t('pagination.next')}"
         >
-          ${i18nService.t('pagination.next')} →
+          →
         </button>
       </div>
     `;

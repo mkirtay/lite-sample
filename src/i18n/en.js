@@ -1,4 +1,13 @@
 export const en = {
+  // App
+  app: {
+    title: 'Employee Management',
+    loadingText: 'Loading Employee Management System...',
+    addEmployee: 'Add Employee',
+    addEmployeeTitle: 'Add New Employee',
+    switchLanguage: 'Switch Language'
+  },
+
   // Common
   common: {
     search: 'Search employees...',
@@ -29,6 +38,7 @@ export const en = {
     department: 'Department',
     position: 'Position',
     hireDate: 'Hire Date',
+    dateOfEmployment: 'Date of Employment',
     dateOfBirth: 'Date of Birth',
     salary: 'Salary',
     actions: 'Actions',
@@ -37,13 +47,18 @@ export const en = {
     addDescription: 'Fill out the form below to add a new employee to your team.',
     editDescription: 'Update the information below to modify employee details.',
     selectDepartment: 'Select Department',
+    selectPosition: 'Select Position',
     deleteConfirmation: 'Are you sure you want to delete {name}?',
     saveConfirmation: 'Are you sure you want to save the employee information?',
-    updateConfirmation: 'Are you sure you want to update the employee information?'
+    updateConfirmation: 'Are you sure you want to update the employee information?',
+    employed: 'Employed',
+    born: 'Born'
   },
 
   // Departments
   departments: {
+    analytics: 'Analytics',
+    tech: 'Tech',
     engineering: 'Engineering',
     marketing: 'Marketing',
     sales: 'Sales',
@@ -73,9 +88,7 @@ export const en = {
   // Positions
   positions: {
     junior: 'Junior',
-    senior: 'Senior',
-    lead: 'Lead',
-    manager: 'Manager',
-    director: 'Director'
+    mid: 'Mid',
+    senior: 'Senior'
   }
 }; 

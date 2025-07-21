@@ -5,7 +5,7 @@ export const APP_CONSTANTS = {
   DEFAULT_LANGUAGE: 'en'
 };
 
-// Employee data constants
+// Employee data constants - Case Study Requirements
 export const DEPARTMENTS = [
   'Analytics',
   'Tech'
@@ -13,7 +13,7 @@ export const DEPARTMENTS = [
 
 export const POSITIONS = [
   'Junior',
-  'Medior', 
+  'Mid', 
   'Senior'
 ];
 
