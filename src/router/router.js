@@ -2,6 +2,9 @@ import { Router } from '@vaadin/router';
 
 export const router = new Router();
 
+// Preload not found page immediately
+import('../components/not-found/not-found-page.js');
+
 export function initializeRouter(outlet) {
   console.log('🚀 Router initializing with outlet:', outlet);
   
@@ -40,6 +43,10 @@ export function initializeRouter(outlet) {
         console.log('✏️ Loading edit employee form...');
         await import('../components/employee-form/employee-form-page.js');
       }
+    },
+    {
+      path: '(.*)',
+      component: 'not-found-page'
     }
   ]);
 

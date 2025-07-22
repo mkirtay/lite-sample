@@ -1,24 +1,29 @@
 {
-  "name": "employee-list-app",
+  "name": "employee-management-system",
   "version": "1.0.0",
-  "description": "Employee Management Application with LitElement",
-  "main": "index.js",
+  "description": "Employee Management System built with LitElement",
+  "main": "index.html",
   "type": "module",
   "scripts": {
-    "start": "web-dev-server --node-resolve --open --watch",
+    "start": "web-dev-server --node-resolve --open --watch --history-api-fallback --app-index index.html",
     "test": "web-test-runner --coverage",
     "test:watch": "web-test-runner --watch"
   },
-  "keywords": ["lit-element", "employee-management", "web-components"],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "lit": "^3.3.1",
+  "devDependencies": {
+    "@web/dev-server": "^0.4.2",
+    "@web/test-runner": "^0.18.0",
     "@vaadin/router": "^1.7.5"
   },
-  "devDependencies": {
-    "@web/dev-server": "^0.4.6",
-    "@web/test-runner": "^0.18.0",
-    "@open-wc/testing": "^4.0.0"
-  }
+  "dependencies": {
+    "lit": "^3.1.0"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "employee-management",
+    "spa"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
 }
+

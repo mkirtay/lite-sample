@@ -1,7 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { Router } from '@vaadin/router';
 import { initializeRouter } from './router/router.js';
-import './components/employee-list/employee-list-page.js';
 import { i18nService } from './i18n/i18n.service.js';
 
 /**
@@ -149,28 +147,31 @@ class EmployeeApp extends LitElement {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      text-decoration: none;
-      color: var(--text-primary);
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       font-weight: 600;
-      transition: opacity 0.3s ease;
+      color: var(--ing-dark-blue);
+      text-decoration: none;
     }
 
-    .app-logo:hover {
-      opacity: 0.9;
+    .logo-icon{
+    max-width: 50px;
+    }
+
+    .logo-svg {
+      height: 32px;
+      width: auto;
+      object-fit: contain;
     }
 
     .logo-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--ing-orange);
-      color: white;
+      width: 32px;
+      height: 32px;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
-      font-size: 1rem;
+      color: white;
+      font-weight: bold;
     }
 
     .header-controls {
@@ -302,7 +303,7 @@ class EmployeeApp extends LitElement {
   firstUpdated() {
     // Initialize router after component is rendered
     setTimeout(() => {
-      const outlet = this.shadowRoot.querySelector('#main-content');
+      const outlet = this.shadowRoot.querySelector('.router-outlet');
       console.log('🎯 Router outlet found:', outlet);
       
       if (outlet) {
@@ -347,37 +348,39 @@ class EmployeeApp extends LitElement {
       ${this.isLoading ? html`
         <div class="loading-screen">
           <div class="loading-spinner"></div>
-          <div class="loading-text">${i18nService.t('app.loadingText')}</div>
+          <div class="loading-text">Loading Employee Management System...</div>
         </div>
       ` : ''}
 
       <header class="app-header">
         <a href="/employees" class="app-logo">
-          <div class="logo-icon">ING</div>
-          ${i18nService.t('app.title')}
+          <img class="logo-icon" src="./src/assets/images/ing-logo.png" alt="ING Logo" />
+          ING
         </a>
         
         <div class="header-controls">
           <button 
             class="add-employee-btn"
             @click=${this.navigateToAddEmployee}
-            title="${i18nService.t('app.addEmployeeTitle')}"
+            title="Add New Employee"
           >
             <span class="employees-icon">+</span>
-            ${i18nService.t('app.addEmployee')}
+            Add Employee
           </button>
           
           <button 
             class="language-switch"
             @click=${this.toggleLanguage}
-            title="${i18nService.t('app.switchLanguage')}"
+            title="Switch Language"
           >
             🌐 ${this.language.toUpperCase()}
           </button>
         </div>
       </header>
 
-      <main id="main-content"></main>
+      <main class="app-main">
+        <div class="router-outlet"></div>
+      </main>
     `;
   }
 }
